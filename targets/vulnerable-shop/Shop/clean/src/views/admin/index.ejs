@@ -1,0 +1,50 @@
+<%- include('../partials/header', { title: 'Admin — VulnShop' }) %>
+
+<h1>Admin Dashboard</h1>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3>Total Users</h3>
+    <p class="stat-value"><%= userCount %></p>
+  </div>
+  <div class="stat-card">
+    <h3>Total Orders</h3>
+    <p class="stat-value"><%= orderCount %></p>
+  </div>
+  <div class="stat-card">
+    <h3>Revenue</h3>
+    <p class="stat-value">$<%= revenue.toFixed(2) %></p>
+  </div>
+</div>
+
+<div class="admin-nav">
+  <a href="/admin/users" class="btn btn-secondary">Manage Users</a>
+  <a href="/admin/orders" class="btn btn-secondary">Manage Orders</a>
+</div>
+
+<section class="card">
+  <h2>Export Orders</h2>
+  <form id="exportForm">
+    <div class="form-group">
+      <label>Export Filename</label>
+      <input type="text" name="filename" placeholder="orders-2024-01" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Export to ZIP</button>
+  </form>
+</section>
+
+<script>
+document.getElementById('exportForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const r = await fetch('/api/admin/export', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  const res = await r.json();
+  alert(res.message || res.error);
+});
+</script>
+
+<%- include('../partials/footer') %>

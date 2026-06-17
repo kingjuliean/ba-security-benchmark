@@ -1,0 +1,711 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# BA Security Benchmark — GitHub Actions Pipeline (FF2: Integrationsaufwand)
+#
+# Stage-Struktur (gemäß Thesis-Design):
+#   Build → SAST (parallel) → SCA (parallel) → Deploy → DAST (parallel)
+#
+# Gemessen wird:
+#   - Build-Time-Δ (job.build mit vs. ohne Security-Tools)
+#   - Scan-Dauer pro Tool (via $SECONDS / timestamps)
+#   - Pipeline-Stage-Komplexität (YAML-Zeilen, Secrets, externe Abhängigkeiten)
+#
+# Secrets in GitHub Repository-Settings setzen:
+#   SNYK_TOKEN          — Snyk API-Token (kostenlos: https://app.snyk.io/account)
+#   SONAR_TOKEN         — SonarQube Cloud oder lokaler Token
+#   SONAR_HOST_URL      — z.B. https://sonarcloud.io  (optional, Default: SonarCloud)
+#
+# Outputs:
+#   benchmark/results/<tool>/<target>/run_<n>.sarif  (als Artifacts hochgeladen)
+#   benchmark/results/timing_ci.csv                  (Build-Time-Δ)
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: BA Security Benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_number:
+        description: "Run-Nummer (1–5) für Reproduzierbarkeits-Tracking"
+        required: true
+        default: "1"
+      target:
+        description: "Target: vulnerable-shop | juice-shop | both"
+        required: true
+        default: "both"
+  push:
+    branches: ["main"]
+    paths:
+      - "targets/**"
+      - "pipeline/**"
+
+env:
+  RUN_NUMBER: ${{ github.event.inputs.run_number || '1' }}
+  TARGET_INPUT: ${{ github.event.inputs.target || 'both' }}
+
+# ── Concurrency: verhindert parallele Benchmark-Runs ─────────────────────────
+concurrency:
+  group: "benchmark-${{ github.ref }}"
+  cancel-in-progress: false
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 1 — Build (Baseline ohne Security-Tools)
+# Zweck: Build-Time-Baseline für FF2-Δ-Messung
+# ══════════════════════════════════════════════════════════════════════════════
+jobs:
+  build:
+    name: "Build (Baseline)"
+    runs-on: ubuntu-latest
+    outputs:
+      build_duration: ${{ steps.timing.outputs.duration }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: targets/vulnerable-shop/Shop/package-lock.json
+
+      - name: "[TIMING] Build-Start"
+        id: build_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Install vulnerable-shop dependencies
+        working-directory: targets/vulnerable-shop/Shop
+        run: npm ci --prefer-offline
+
+      - name: "[TIMING] Build-Ende → duration"
+        id: timing
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.build_start.outputs.start }}))
+          echo "duration=${duration}" >> "$GITHUB_OUTPUT"
+          echo "Build-Dauer: ${duration}s"
+
+      - name: Cache node_modules für nachfolgende Jobs
+        uses: actions/cache@v4
+        with:
+          path: targets/vulnerable-shop/Shop/node_modules
+          key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
+
+      - name: Upload Source als Artifact (für SAST-Jobs)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerable-shop-source
+          path: targets/vulnerable-shop/Shop/
+          retention-days: 1
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 2 — SAST (parallel, nach Build)
+# ══════════════════════════════════════════════════════════════════════════════
+
+  # ── SAST: Semgrep ────────────────────────────────────────────────────────────
+  sast-semgrep:
+    name: "SAST · Semgrep"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Semgrep Scan
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/owasp-top-ten
+            p/javascript
+            p/nodejs
+        env:
+          SEMGREP_APP_TOKEN: ""  # Leer = Community-Regeln ohne Cloud-Reporting
+
+      # Alternativ: direkter CLI-Aufruf mit SARIF-Output
+      - name: Semgrep CLI → SARIF
+        run: |
+          pip install semgrep --quiet
+          mkdir -p benchmark/results/semgrep/vulnerable-shop
+          semgrep scan \
+            --config "p/owasp-top-ten" \
+            --config "p/javascript" \
+            --config "p/nodejs" \
+            --sarif \
+            --output "benchmark/results/semgrep/vulnerable-shop/run_${{ env.RUN_NUMBER }}.sarif" \
+            targets/vulnerable-shop/Shop/ \
+            || true  # Exit-Code 1 bei Findings ist normal
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          echo "semgrep,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+          echo "Semgrep Scan-Dauer: ${duration}s"
+
+      - name: Upload SARIF → GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: benchmark/results/semgrep/vulnerable-shop/run_${{ env.RUN_NUMBER }}.sarif
+          category: semgrep-run-${{ env.RUN_NUMBER }}
+
+      - name: Upload SARIF als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sarif-semgrep-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/semgrep/
+
+  # ── SAST: CodeQL ─────────────────────────────────────────────────────────────
+  sast-codeql:
+    name: "SAST · CodeQL"
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: codeql-run-${{ env.RUN_NUMBER }}
+          output: benchmark/results/codeql/vulnerable-shop/
+          upload: false  # Wir uploaden manuell als Artifact
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          echo "codeql,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+          echo "CodeQL Scan-Dauer: ${duration}s"
+
+      - name: Benenne SARIF-Datei einheitlich
+        run: |
+          mkdir -p benchmark/results/codeql/vulnerable-shop
+          find benchmark/results/codeql/vulnerable-shop -name "*.sarif" | head -1 | \
+            xargs -I{} mv {} \
+            "benchmark/results/codeql/vulnerable-shop/run_${{ env.RUN_NUMBER }}.sarif" \
+            2>/dev/null || true
+
+      - name: Upload SARIF als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sarif-codeql-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/codeql/
+
+  # ── SAST: SonarQube ──────────────────────────────────────────────────────────
+  sast-sonarqube:
+    name: "SAST · SonarQube"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # SonarQube benötigt vollständige Git-Historie
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Restore node_modules Cache
+        uses: actions/cache@v4
+        with:
+          path: targets/vulnerable-shop/Shop/node_modules
+          key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}
+        with:
+          projectBaseDir: targets/vulnerable-shop/Shop
+          args: >
+            -Dsonar.projectKey=ba-security-benchmark-vulnerable-shop
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.sources=.
+            -Dsonar.scm.disabled=true
+            -Dsonar.javascript.node.maxspace=2048
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          echo "sonarqube,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+          echo "SonarQube Scan-Dauer: ${duration}s"
+
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: timing-sonarqube-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 3 — SCA (parallel, nach Build)
+# ══════════════════════════════════════════════════════════════════════════════
+
+  # ── SCA: npm audit ───────────────────────────────────────────────────────────
+  sca-npm-audit:
+    name: "SCA · npm audit"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Restore node_modules Cache
+        uses: actions/cache@v4
+        with:
+          path: targets/vulnerable-shop/Shop/node_modules
+          key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: npm audit → JSON
+        working-directory: targets/vulnerable-shop/Shop
+        run: |
+          mkdir -p ../../../benchmark/results/npm-audit/vulnerable-shop
+          npm audit --json \
+            > "../../../benchmark/results/npm-audit/vulnerable-shop/run_${{ env.RUN_NUMBER }}.json" \
+            || true  # Exit-Code 1 bei Findings ist normal
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
+          echo "npm-audit,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+      - name: Upload JSON als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-npm-audit-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/npm-audit/
+
+  # ── SCA: Snyk ────────────────────────────────────────────────────────────────
+  sca-snyk:
+    name: "SCA · Snyk"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Restore node_modules Cache
+        uses: actions/cache@v4
+        with:
+          path: targets/vulnerable-shop/Shop/node_modules
+          key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Snyk Test → JSON
+        working-directory: targets/vulnerable-shop/Shop
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          npm install -g snyk --quiet
+          mkdir -p ../../../benchmark/results/snyk/vulnerable-shop
+          snyk test --json \
+            > "../../../benchmark/results/snyk/vulnerable-shop/run_${{ env.RUN_NUMBER }}.json" \
+            || true  # Exit-Code 1 bei Vulnerabilities ist normal
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          echo "snyk,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+      - name: Upload JSON als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-snyk-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/snyk/
+
+  # ── SCA: OWASP Dependency-Check ──────────────────────────────────────────────
+  sca-dependency-check:
+    name: "SCA · OWASP Dependency-Check"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: "benchmark-vulnerable-shop"
+          path: "targets/vulnerable-shop/Shop"
+          format: "JSON SARIF"
+          out: "benchmark/results/dependency-check/vulnerable-shop"
+          args: >
+            --enableExperimental
+            --failOnCVSS 0
+
+      - name: Benenne Output einheitlich
+        run: |
+          dir="benchmark/results/dependency-check/vulnerable-shop"
+          # JSON umbenennen
+          [ -f "${dir}/dependency-check-report.json" ] && \
+            cp "${dir}/dependency-check-report.json" \
+               "${dir}/run_${{ env.RUN_NUMBER }}.json" || true
+          # SARIF umbenennen
+          [ -f "${dir}/dependency-check-report.sarif" ] && \
+            cp "${dir}/dependency-check-report.sarif" \
+               "${dir}/run_${{ env.RUN_NUMBER }}.sarif" || true
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          echo "dependency-check,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+      - name: Upload Reports als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-dependency-check-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/dependency-check/
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 4 — Deploy (startet Targets für DAST)
+# ══════════════════════════════════════════════════════════════════════════════
+  deploy:
+    name: "Deploy Targets"
+    runs-on: ubuntu-latest
+    needs: [sast-semgrep, sast-codeql, sast-sonarqube, sca-npm-audit, sca-snyk, sca-dependency-check]
+    outputs:
+      vulnerable_shop_url: "http://localhost:3001"
+      juice_shop_url:       "http://localhost:3000"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: "[TIMING] Deploy-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Starte vulnerable-shop
+        working-directory: targets/vulnerable-shop/Shop
+        run: |
+          docker compose up -d --build
+          echo "Warte auf vulnerable-shop..."
+          timeout 120 bash -c 'until curl -sf http://localhost:3001 > /dev/null; do sleep 3; done'
+          echo "vulnerable-shop bereit."
+
+      - name: Starte juice-shop
+        if: env.TARGET_INPUT == 'both' || env.TARGET_INPUT == 'juice-shop'
+        working-directory: targets/juice-shop
+        run: |
+          docker compose up -d
+          echo "Warte auf juice-shop..."
+          timeout 120 bash -c 'until curl -sf http://localhost:3000 > /dev/null; do sleep 3; done'
+          echo "juice-shop bereit."
+
+      - name: "[TIMING] Deploy-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
+          echo "deploy,both,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 5 — DAST (parallel, nach Deploy)
+# ══════════════════════════════════════════════════════════════════════════════
+
+  # ── DAST: OWASP ZAP ──────────────────────────────────────────────────────────
+  dast-zap:
+    name: "DAST · OWASP ZAP"
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Starte vulnerable-shop (in diesem Job neu starten)
+        working-directory: targets/vulnerable-shop/Shop
+        run: |
+          docker compose up -d --build
+          timeout 120 bash -c 'until curl -sf http://localhost:3001 > /dev/null; do sleep 3; done'
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      # ZAP Automation Framework (nutzt .zap/automation.yml des Targets)
+      - name: ZAP Full Scan — vulnerable-shop
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: "http://localhost:3001"
+          rules_file_name: ".rules"
+          cmd_options: "-J run_${{ env.RUN_NUMBER }}.json"
+          allow_issue_writing: false
+
+      - name: ZAP Output sichern
+        run: |
+          mkdir -p benchmark/results/zap/vulnerable-shop
+          [ -f "run_${{ env.RUN_NUMBER }}.json" ] && \
+            mv "run_${{ env.RUN_NUMBER }}.json" \
+               "benchmark/results/zap/vulnerable-shop/run_${{ env.RUN_NUMBER }}.json" || true
+          [ -f report_html.html ] && \
+            mv report_html.html \
+               "benchmark/results/zap/vulnerable-shop/run_${{ env.RUN_NUMBER }}.html" || true
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
+          echo "zap,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+      - name: Upload ZAP-Reports als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-zap-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/zap/
+
+  # ── DAST: Nuclei ─────────────────────────────────────────────────────────────
+  dast-nuclei:
+    name: "DAST · Nuclei"
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Starte vulnerable-shop
+        working-directory: targets/vulnerable-shop/Shop
+        run: |
+          docker compose up -d --build
+          timeout 120 bash -c 'until curl -sf http://localhost:3001 > /dev/null; do sleep 3; done'
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Nuclei Scan
+        uses: projectdiscovery/nuclei-action@main
+        with:
+          target: "http://localhost:3001"
+          flags: >-
+            -severity critical,high,medium,low
+            -json-export nuclei_output.json
+            -silent
+
+      - name: Nuclei Output sichern
+        run: |
+          mkdir -p benchmark/results/nuclei/vulnerable-shop
+          [ -f nuclei_output.json ] && \
+            mv nuclei_output.json \
+               "benchmark/results/nuclei/vulnerable-shop/run_${{ env.RUN_NUMBER }}.json" || \
+            echo "[]" > "benchmark/results/nuclei/vulnerable-shop/run_${{ env.RUN_NUMBER }}.json"
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          echo "nuclei,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+      - name: Upload als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-nuclei-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/nuclei/
+
+  # ── DAST: Burp Dastardly ─────────────────────────────────────────────────────
+  dast-dastardly:
+    name: "DAST · Burp Dastardly"
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Starte vulnerable-shop
+        working-directory: targets/vulnerable-shop/Shop
+        run: |
+          docker compose up -d --build
+          timeout 120 bash -c 'until curl -sf http://localhost:3001 > /dev/null; do sleep 3; done'
+
+      - name: "[TIMING] Scan-Start"
+        id: t_start
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Burp Dastardly Scan
+        continue-on-error: true  # Exit-Code 1 bei Findings ist normal
+        run: |
+          mkdir -p benchmark/results/dastardly/vulnerable-shop
+          docker run --rm \
+            --network host \
+            -v "$(pwd)/benchmark/results/dastardly/vulnerable-shop:/dastardly-reports" \
+            -e BURP_START_URL="http://localhost:3001" \
+            -e BURP_REPORT_FILE_PATH="/dastardly-reports/run_${{ env.RUN_NUMBER }}.xml" \
+            public.ecr.aws/portswigger/dastardly:latest
+
+      - name: "[TIMING] Scan-Ende → CSV"
+        run: |
+          end=$(date +%s)
+          duration=$((end - ${{ steps.t_start.outputs.start }}))
+          echo "dastardly,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+      - name: Upload XML-Report als Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-dastardly-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/dastardly/
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 6 — Collect & Measure (Build-Time-Δ + Zusammenfassung)
+# ══════════════════════════════════════════════════════════════════════════════
+  collect-timings:
+    name: "Collect Timings (FF2)"
+    runs-on: ubuntu-latest
+    needs: [dast-zap, dast-nuclei, dast-dastardly]
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Alle Timing-Artifacts zusammenführen
+      - name: Download alle Timing-Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "timing-*"
+          path: timing-artifacts/
+
+      - name: Timing-CSV konsolidieren
+        run: |
+          mkdir -p benchmark/results
+          echo "tool,target,run,duration_seconds,timestamp" \
+            > benchmark/results/timing_ci.csv
+
+          # Alle timing_ci.csv aus Sub-Artifacts zusammenführen
+          find timing-artifacts/ -name "timing_ci.csv" -exec tail -n +2 {} \; \
+            >> benchmark/results/timing_ci.csv
+
+          echo "=== Timing-Übersicht ==="
+          column -t -s',' benchmark/results/timing_ci.csv || cat benchmark/results/timing_ci.csv
+
+      # Build-Time-Δ berechnen:
+      # Δ = (Build-Dauer MIT Security-Steps) − (Build-Dauer OHNE Security-Steps)
+      # "ohne" = job.build.outputs.build_duration
+      - name: Build-Time-Δ berechnen
+        run: |
+          baseline=${{ needs.build.outputs.build_duration || 0 }}
+          echo "Baseline (npm ci ohne Security-Tools): ${baseline}s"
+
+          # Summe aller SAST/SCA-Scan-Dauern aus CSV
+          sast_sca_total=$(awk -F',' '
+            /^(semgrep|codeql|sonarqube|npm-audit|snyk|dependency-check),/ {sum += $4}
+            END {print sum}
+          ' benchmark/results/timing_ci.csv)
+
+          echo "SAST+SCA-Tool-Zeit gesamt: ${sast_sca_total}s"
+          echo "Build-Time-Delta: $((sast_sca_total))s über Baseline"
+
+          # In CSV anhängen
+          echo "build_baseline,all,${{ env.RUN_NUMBER }},${baseline},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+          echo "sast_sca_overhead,all,${{ env.RUN_NUMBER }},${sast_sca_total},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            >> benchmark/results/timing_ci.csv
+
+      - name: Upload konsolidiertes Timing
+        uses: actions/upload-artifact@v4
+        with:
+          name: timing-consolidated-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
+          retention-days: 30
+
+      - name: Pipeline-Summary (GitHub Actions Summary)
+        run: |
+          {
+            echo "## BA Security Benchmark — Run ${{ env.RUN_NUMBER }}"
+            echo ""
+            echo "### Timing-Übersicht"
+            echo "\`\`\`"
+            column -t -s',' benchmark/results/timing_ci.csv 2>/dev/null || \
+              cat benchmark/results/timing_ci.csv
+            echo "\`\`\`"
+            echo ""
+            echo "### Artifacts"
+            echo "- SARIF-Outputs: sarif-semgrep-run-*, sarif-codeql-run-*"
+            echo "- SCA-JSONs:     result-npm-audit-run-*, result-snyk-run-*, result-dependency-check-run-*"
+            echo "- DAST-Reports:  result-zap-run-*, result-nuclei-run-*, result-dastardly-run-*"
+            echo "- Timing:        timing-consolidated-run-*"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,28 @@
+{
+  "name": "vulnerable-shop",
+  "version": "1.0.0",
+  "description": "Deliberately vulnerable e-commerce app for academic security-tool benchmarking",
+  "main": "clean/src/app.js",
+  "scripts": {
+    "start": "node clean/src/app.js",
+    "start:annotated": "node annotated/src/app.js",
+    "dev": "nodemon clean/src/app.js"
+  },
+  "dependencies": {
+    "axios": "0.21.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "ejs": "^3.1.9",
+    "express": "4.16.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "jsonwebtoken": "8.5.1",
+    "lodash": "4.17.20",
+    "marked": "0.3.6",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}

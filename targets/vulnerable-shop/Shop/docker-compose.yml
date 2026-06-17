@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  shop:
+    build: .
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./data:/app/data
+      - ./public/uploads:/app/public/uploads
+      - /tmp/exports:/tmp/exports
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_PATH=/app/data/shop.db
+    restart: unless-stopped

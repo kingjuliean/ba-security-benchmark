@@ -1,0 +1,31 @@
+<%- include('../partials/header', { title: 'Orders — Admin' }) %>
+
+<h1>Order Management</h1>
+<p><a href="/admin">&larr; Dashboard</a></p>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Order #</th>
+      <th>User</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% orders.forEach(order => { %>
+    <tr>
+      <td>#<%= order.id %></td>
+      <td><%= order.username %></td>
+      <td>$<%= order.total.toFixed(2) %></td>
+      <td><span class="badge badge-<%= order.status %>"><%= order.status %></span></td>
+      <td><%= order.created_at %></td>
+      <td><a href="/api/orders/<%= order.id %>">View</a></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../partials/footer') %>

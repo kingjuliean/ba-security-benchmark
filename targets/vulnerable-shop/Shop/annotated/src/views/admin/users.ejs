@@ -1,0 +1,31 @@
+<%- include('../partials/header', { title: 'Users — Admin' }) %>
+
+<h1>User Management</h1>
+<p><a href="/admin">&larr; Dashboard</a></p>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Password Hash</th>
+      <th>Joined</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% users.forEach(user => { %>
+    <tr>
+      <td><%= user.id %></td>
+      <td><%= user.username %></td>
+      <td><%= user.email %></td>
+      <td><span class="badge"><%= user.role %></span></td>
+      <td class="hash-cell"><%= user.password_hash %></td>
+      <td><%= user.created_at %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../partials/footer') %>

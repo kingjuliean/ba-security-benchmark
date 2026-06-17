@@ -1,0 +1,26 @@
+<%- include('../partials/header', { title: 'Products — VulnShop' }) %>
+
+<div class="page-header">
+  <h1>Products</h1>
+  <form action="/products/search" method="GET" class="search-form">
+    <input type="text" name="q" placeholder="Search products..." class="search-input">
+    <button type="submit" class="btn btn-secondary">Search</button>
+  </form>
+</div>
+
+<div class="product-grid" id="<%= carouselId %>">
+  <% products.forEach(product => { %>
+  <div class="product-card">
+    <h3><a href="/products/<%= product.id %>"><%= product.name %></a></h3>
+    <p class="price">$<%= product.price.toFixed(2) %></p>
+    <p class="category"><%= product.category %></p>
+    <p class="stock"><%= product.stock %> in stock</p>
+    <a href="/products/<%= product.id %>" class="btn btn-primary">View Details</a>
+  </div>
+  <% }) %>
+  <% if (products.length === 0) { %>
+    <p>No products available.</p>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

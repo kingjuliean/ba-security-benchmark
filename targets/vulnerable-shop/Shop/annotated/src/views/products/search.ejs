@@ -1,0 +1,31 @@
+<%- include('../partials/header', { title: 'Search — VulnShop' }) %>
+
+<div class="page-header">
+  <h1>Search Results</h1>
+  <form action="/products/search" method="GET" class="search-form">
+    <input type="text" name="q" value="<%= query.q || '' %>" placeholder="Search products..." class="search-input">
+    <button type="submit" class="btn btn-secondary">Search</button>
+  </form>
+</div>
+
+<% if (searchTerm) { %>
+  <%# [VULN-V04: Reflected XSS — CWE-79 — <%- %> renders searchTerm unescaped into HTML] %>
+  <p class="search-meta">Results for: <%- searchTerm %></p>
+  <%# [DECOY-K04: <%= %> is EJS HTML-escaped output — & < > " ' are entity-encoded — safe] %>
+  <p class="search-category">Category: <%= query.category || 'All' %></p>
+<% } %>
+
+<div class="product-grid">
+  <% results.forEach(product => { %>
+  <div class="product-card">
+    <h3><a href="/products/<%= product.id %>"><%= product.name %></a></h3>
+    <p class="price">$<%= product.price.toFixed(2) %></p>
+    <a href="/products/<%= product.id %>" class="btn btn-primary">View Details</a>
+  </div>
+  <% }) %>
+  <% if (results.length === 0 && searchTerm) { %>
+    <p>No products found for your search.</p>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

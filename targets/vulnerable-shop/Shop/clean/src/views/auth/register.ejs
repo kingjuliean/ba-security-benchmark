@@ -1,0 +1,43 @@
+<%- include('../partials/header', { title: 'Register — VulnShop' }) %>
+
+<div class="auth-card">
+  <h1>Create Account</h1>
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+  <form id="registerForm">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Account</button>
+  </form>
+  <p class="auth-links"><a href="/login">Already have an account?</a></p>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const r = await fetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (r.ok) window.location.href = '/login';
+  else {
+    const err = await r.json();
+    alert(err.error);
+  }
+});
+</script>
+
+<%- include('../partials/footer') %>

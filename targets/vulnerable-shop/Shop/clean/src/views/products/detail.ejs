@@ -1,0 +1,69 @@
+<%- include('../partials/header', { title: product.name + ' — VulnShop' }) %>
+
+<div class="product-detail">
+  <div class="product-info">
+    <h1><%= product.name %></h1>
+    <p class="price">$<%= product.price.toFixed(2) %></p>
+    <p class="category">Category: <%= product.category %></p>
+    <p class="stock">In stock: <%= product.stock %></p>
+    <div class="description"><%- descriptionHtml %></div>
+    <button class="btn btn-primary" onclick="addToCart(<%= product.id %>, '<%= product.name %>', <%= product.price %>)">
+      Add to Cart
+    </button>
+  </div>
+</div>
+
+<section class="reviews-section">
+  <h2>Customer Reviews</h2>
+  <% reviews.forEach(review => { %>
+  <div class="review-card">
+    <div class="review-header">
+      <strong><%= review.username %></strong>
+      <span class="rating">Rating: <%= review.rating %>/5</span>
+      <span class="date"><%= review.created_at %></span>
+    </div>
+    <p class="review-text"><%- review.content %></p>
+  </div>
+  <% }) %>
+  <% if (reviews.length === 0) { %>
+    <p>No reviews yet. Be the first to review!</p>
+  <% } %>
+
+  <div class="review-form">
+    <h3>Write a Review</h3>
+    <form id="reviewForm">
+      <input type="hidden" name="productId" value="<%= product.id %>">
+      <div class="form-group">
+        <label for="rating">Rating</label>
+        <select name="rating" id="rating">
+          <option value="5">5 — Excellent</option>
+          <option value="4">4 — Good</option>
+          <option value="3">3 — Average</option>
+          <option value="2">2 — Poor</option>
+          <option value="1">1 — Terrible</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="content">Review</label>
+        <textarea name="content" id="content" rows="4" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-secondary">Post Review</button>
+    </form>
+  </div>
+</section>
+
+<script>
+document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const r = await fetch('/api/reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (r.ok) window.location.reload();
+  else alert('Failed to post review. Please log in first.');
+});
+</script>
+
+<%- include('../partials/footer') %>

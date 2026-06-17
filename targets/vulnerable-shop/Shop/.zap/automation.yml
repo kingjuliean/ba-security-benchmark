@@ -1,0 +1,65 @@
+---
+env:
+  contexts:
+    - name: "vulnerable-shop"
+      urls:
+        - "http://localhost:3000"
+      includePaths:
+        - "http://localhost:3000.*"
+      excludePaths:
+        - "http://localhost:3000/api/auth/logout.*"
+      authentication:
+        method: "json"
+        parameters:
+          loginPageUrl: "http://localhost:3000/login"
+          loginRequestUrl: "http://localhost:3000/api/auth/login"
+          loginRequestBody: '{"username":"testuser","password":"user123"}'
+        verification:
+          method: "response"
+          loggedInRegex: "token"
+          loggedOutRegex: "Invalid credentials"
+      users:
+        - name: "testuser"
+          credentials:
+            username: "testuser"
+            password: "user123"
+        - name: "admin"
+          credentials:
+            username: "admin"
+            password: "admin123"
+      sessionManagement:
+        method: "cookie"
+        parameters:
+          cookieName: "token"
+
+jobs:
+  - type: spider
+    parameters:
+      context: "vulnerable-shop"
+      user: "testuser"
+      maxDuration: 5
+      maxDepth: 5
+
+  - type: spiderAjax
+    parameters:
+      context: "vulnerable-shop"
+      user: "testuser"
+      maxDuration: 2
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  - type: activeScan
+    parameters:
+      context: "vulnerable-shop"
+      user: "testuser"
+      policy: "Default Policy"
+      maxScanDurationInMins: 60
+
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportDir: "/zap/reports"
+      reportFile: "vulnerable-shop-report"
+      reportTitle: "Vulnerable Shop — ZAP Scan Report"

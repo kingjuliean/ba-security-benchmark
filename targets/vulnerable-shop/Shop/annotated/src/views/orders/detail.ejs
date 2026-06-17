@@ -1,0 +1,29 @@
+<%- include('../partials/header', { title: 'Order #' + order.id + ' — VulnShop' }) %>
+
+<h1>Order #<%= order.id %></h1>
+<p>Status: <span class="badge badge-<%= order.status %>"><%= order.status %></span></p>
+<p>Placed: <%= order.created_at %></p>
+<p>Shipping to: <%= order.shipping_address %></p>
+
+<table class="data-table">
+  <thead>
+    <tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+  </thead>
+  <tbody>
+    <% items.forEach(item => { %>
+    <tr>
+      <td><%= item.name %></td>
+      <td><%= item.quantity %></td>
+      <td>$<%= item.price.toFixed(2) %></td>
+      <td>$<%= (item.price * item.quantity).toFixed(2) %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+  <tfoot>
+    <tr><td colspan="3"><strong>Total</strong></td><td><strong>$<%= order.total.toFixed(2) %></strong></td></tr>
+  </tfoot>
+</table>
+
+<p><a href="/api/orders">&larr; Back to orders</a></p>
+
+<%- include('../partials/footer') %>
