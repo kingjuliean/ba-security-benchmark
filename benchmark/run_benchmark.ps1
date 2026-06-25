@@ -1,7 +1,7 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
-    Lokaler Benchmark-Runner für alle 9 Security-Tools (FF1 — Detektionsqualität).
+    Lokaler Benchmark-Runner für alle 9 Security-Tools (FF1 -- Detektionsqualität).
 
 .DESCRIPTION
     Startet ein oder alle Tools gegen ein oder beide Targets.
@@ -16,13 +16,13 @@
     vulnerable-shop | juice-shop | all
 
 .PARAMETER Run
-    Run-Nummer (1–N). 0 = alle Runs ausführen (Default).
+    Run-Nummer (1-N). 0 = alle Runs ausführen (Default).
 
 .PARAMETER Runs
-    Anzahl Wiederholungen pro Tool×Target-Kombination (Default: 3).
+    Anzahl Wiederholungen pro ToolxTarget-Kombination (Default: 3).
 
 .PARAMETER SkipStartup
-    Targets nicht (neu) starten — nützlich wenn bereits laufen.
+    Targets nicht (neu) starten -- nützlich wenn bereits laufen.
 
 .EXAMPLE
     # Einzelner Run
@@ -51,7 +51,29 @@ Set-StrictMode -Version Latest
 # Continue statt Stop: Ein fehlgeschlagenes Tool stoppt nicht den Gesamtlauf
 $ErrorActionPreference = "Continue"
 
-# ── Pfade ─────────────────────────────────────────────────────────────────────
+# -- Gepinnte Tool-Versionen (Reproduzierbarkeit) ------------------------------
+# Versions hier ändern um einen neuen Benchmark-Snapshot zu erstellen.
+# Doku-Pflicht: jede Änderung -> Eintrag in benchmark/tool-setup-times.md
+$Images = @{
+    # SAST
+    "semgrep"          = "semgrep/semgrep:1.77.0"
+    # CodeQL: mcr.microsoft.com-Image hat kein stabiles Versions-Tagging.
+    # Empfehlung: Tag aus `docker inspect` nach Pull dokumentieren.
+    "codeql"           = "mcr.microsoft.com/cstsectools/codeql-container:latest"
+    "sonarqube"        = "sonarqube:9.9.8-community"          # LTS-Linie
+    "sonar-scanner"    = "sonarsource/sonar-scanner-cli:11.0"
+    # DAST
+    "zap"              = "ghcr.io/zaproxy/zaproxy:2.15.0"
+    "nuclei"           = "projectdiscovery/nuclei:v3.3.4"
+    # Dastardly: PortSwigger stellt keine versionierten Tags bereit.
+    # Workaround: Image-SHA nach Pull in tool-setup-times.md festhalten.
+    "dastardly"        = "public.ecr.aws/portswigger/dastardly:latest"
+    # SCA
+    "dependency-check" = "owasp/dependency-check:12.1.0"
+    "snyk"             = "snyk/snyk:node-18"
+}
+
+# -- Pfade ---------------------------------------------------------------------
 
 $RepoRoot    = (Resolve-Path "$PSScriptRoot\..").Path
 $ResultsDir  = Join-Path $PSScriptRoot "results"
@@ -59,7 +81,7 @@ $TimingFile  = Join-Path $ResultsDir   "timing.csv"
 $TargetsDir  = Join-Path $RepoRoot     "targets"
 $DcCacheDir  = Join-Path $PSScriptRoot ".dc-cache"  # NVD-Daten zwischen Runs teilen
 
-# ── Target-Konfiguration ──────────────────────────────────────────────────────
+# -- Target-Konfiguration ------------------------------------------------------
 
 $Targets = @{
     "vulnerable-shop" = @{
@@ -71,7 +93,7 @@ $Targets = @{
         Port       = 3001
     }
     "juice-shop" = @{
-        SourcePath = Join-Path $TargetsDir "juice-shop"
+        SourcePath = Join-Path $TargetsDir "juice-shop\src"
         ComposeDir = Join-Path $TargetsDir "juice-shop"
         HostUrl    = "http://localhost:3000"
         DockerUrl  = "http://host.docker.internal:3000"
@@ -85,17 +107,17 @@ $AllTools  = @("semgrep","codeql","sonarqube",
 
 $DastTools = @("zap","nuclei","dastardly")
 
-# ── Logging-Hilfsfunktionen ───────────────────────────────────────────────────
+# -- Logging-Hilfsfunktionen ---------------------------------------------------
 
 function Log-Header([string]$msg) {
-    Write-Host ("`n" + ("─" * 68)) -ForegroundColor Cyan
+    Write-Host ("`n" + ("-" * 68)) -ForegroundColor Cyan
     Write-Host "  $msg" -ForegroundColor Cyan
-    Write-Host ("─" * 68) -ForegroundColor Cyan
+    Write-Host ("-" * 68) -ForegroundColor Cyan
 }
-function Log-Step([string]$msg)  { Write-Host "  → $msg" -ForegroundColor DarkGray }
-function Log-Ok([string]$msg)    { Write-Host "  ✓ $msg" -ForegroundColor Green }
-function Log-Warn([string]$msg)  { Write-Host "  ⚠ $msg" -ForegroundColor Yellow }
-function Log-Err([string]$msg)   { Write-Host "  ✗ $msg" -ForegroundColor Red }
+function Log-Step([string]$msg)  { Write-Host "  -> $msg" -ForegroundColor DarkGray }
+function Log-Ok([string]$msg)    { Write-Host "  [OK] $msg" -ForegroundColor Green }
+function Log-Warn([string]$msg)  { Write-Host "  [!!] $msg" -ForegroundColor Yellow }
+function Log-Err([string]$msg)   { Write-Host "  [XX] $msg" -ForegroundColor Red }
 
 # Löst Pfad auf (Abs = Absolutpfad, Fehler toleriert)
 function Abs([string]$p) {
@@ -131,22 +153,24 @@ function Wait-Http([string]$url, [int]$timeoutSec = 90) {
         } catch {}
         Start-Sleep 3
     }
-    Log-Warn "Timeout — $url nicht erreichbar."
+    Log-Warn "Timeout -- $url nicht erreichbar."
     return $false
 }
 
-# ── Target-Verwaltung ─────────────────────────────────────────────────────────
+# -- Target-Verwaltung ---------------------------------------------------------
 
 function Start-AppTarget([string]$name) {
     $cfg = $Targets[$name]
     Log-Step "Starte $name (docker compose up -d)..."
     Push-Location $cfg.ComposeDir
     docker compose up -d 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Log-Warn "docker compose up fehlgeschlagen fuer $name -- Target laeuft moeglicherweise nicht." }
     Pop-Location
-    Wait-Http $cfg.HostUrl -timeoutSec 120 | Out-Null
+    $reachable = Wait-Http $cfg.HostUrl -timeoutSec 120
+    if (-not $reachable) { Log-Warn "$name nicht erreichbar nach 120s -- DAST-Scan kann fehlschlagen." }
 }
 
-# ── SAST: Semgrep ─────────────────────────────────────────────────────────────
+# -- SAST: Semgrep -------------------------------------------------------------
 
 function Run-Semgrep([string]$tgt, [int]$run) {
     $cfg    = $Targets[$tgt]
@@ -155,20 +179,20 @@ function Run-Semgrep([string]$tgt, [int]$run) {
     $outDir = Abs (Split-Path $out)
     $outFile = Split-Path $out -Leaf
 
-    # juice-shop: Quellcode nicht im Repo — einmalig klonen
+    # juice-shop: Quellcode nicht im Repo -- einmalig klonen
     if ($tgt -eq "juice-shop" -and -not (Test-Path (Join-Path $src "package.json"))) {
         Log-Step "Klone juice-shop Quellcode (einmalig)..."
-        git clone --depth 1 https://github.com/juice-shop/juice-shop.git $src 2>&1 | Out-Null
+        git -c http.sslVerify=false clone --depth 1 https://github.com/juice-shop/juice-shop.git $src 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) { Log-Err "git clone fehlgeschlagen."; return $false }
     }
 
-    Log-Step "Image: semgrep/semgrep:latest"
+    Log-Step "Image: $($Images['semgrep'])"
 
     docker run --rm `
         --name "bench-semgrep-${tgt}-r${run}" `
         -v "${src}:/src:ro" `
         -v "${outDir}:/out" `
-        semgrep/semgrep:latest `
+        $Images["semgrep"] `
         semgrep scan `
             --config "p/owasp-top-ten" `
             --config "p/javascript" `
@@ -177,11 +201,11 @@ function Run-Semgrep([string]$tgt, [int]$run) {
             --output "/out/${outFile}" `
             /src
     # Exit-Code 1 bei Findings ist normal
-    if (Test-Path $out) { Log-Ok "→ $out"; return $true }
+    if (Test-Path $out) { Log-Ok "-> $out"; return $true }
     Log-Warn "Semgrep: keine SARIF-Ausgabe."; return $false
 }
 
-# ── SAST: CodeQL ──────────────────────────────────────────────────────────────
+# -- SAST: CodeQL --------------------------------------------------------------
 
 function Run-CodeQL([string]$tgt, [int]$run) {
     $cfg    = $Targets[$tgt]
@@ -190,7 +214,7 @@ function Run-CodeQL([string]$tgt, [int]$run) {
     $outDir = Abs (Split-Path $out)
 
     if ($tgt -eq "juice-shop" -and -not (Test-Path (Join-Path $src "package.json"))) {
-        Log-Warn "juice-shop Quellcode fehlt — CodeQL übersprungen."; return $false
+        Log-Warn "juice-shop Quellcode fehlt -- CodeQL übersprungen."; return $false
     }
 
     # Datenbank-Verzeichnis (pro Run getrennt)
@@ -198,14 +222,14 @@ function Run-CodeQL([string]$tgt, [int]$run) {
     New-Item -ItemType Directory -Force -Path $dbDir | Out-Null
     $dbAbs = Abs $dbDir
 
-    Log-Step "Image: mcr.microsoft.com/cstsectools/codeql-container:latest"
+    Log-Step "Image: $($Images['codeql'])"
     Log-Step "Phase 1/2: Datenbank erstellen..."
 
     docker run --rm `
         --name "bench-codeql-db-${tgt}-r${run}" `
         -v "${src}:/src:ro" `
         -v "${dbAbs}:/db" `
-        mcr.microsoft.com/cstsectools/codeql-container:latest `
+        $Images["codeql"] `
         codeql database create /db `
             --language=javascript-typescript `
             --source-root=/src `
@@ -218,18 +242,18 @@ function Run-CodeQL([string]$tgt, [int]$run) {
         --name "bench-codeql-analyze-${tgt}-r${run}" `
         -v "${dbAbs}:/db:ro" `
         -v "${outDir}:/out" `
-        mcr.microsoft.com/cstsectools/codeql-container:latest `
+        $Images["codeql"] `
         codeql database analyze /db `
             "javascript-security-and-quality.qls" `
             --format=sarif-latest `
             --output="/out/run_${run}.sarif" `
             --threads=0
 
-    if (Test-Path $out) { Log-Ok "→ $out"; return $true }
+    if (Test-Path $out) { Log-Ok "-> $out"; return $true }
     Log-Warn "CodeQL: keine SARIF-Ausgabe."; return $false
 }
 
-# ── SAST: SonarQube Community Edition ────────────────────────────────────────
+# -- SAST: SonarQube Community Edition ----------------------------------------
 
 function Run-SonarQube([string]$tgt, [int]$run) {
     $cfg     = $Targets[$tgt]
@@ -241,21 +265,29 @@ function Run-SonarQube([string]$tgt, [int]$run) {
     $sqPass  = "BenchmarkAdmin2024!"
     $projKey = "bench-$($tgt -replace '-','')"
 
-    Log-Step "Image: sonarqube:community + sonarsource/sonar-scanner-cli:latest"
+    Log-Step "Image: $($Images['sonarqube']) + $($Images['sonar-scanner'])"
 
     # SonarQube-Server starten falls nicht bereits läuft
     $exists = docker ps -a --filter "name=$sqCont" --format "{{.Names}}" 2>&1
     if ($exists -notmatch $sqCont) {
         Log-Step "Erstelle SonarQube-Server (einmaliges Erststart)..."
-        docker network create $sqNet 2>&1 | Out-Null
+        # Netzwerk nur erstellen wenn es noch nicht existiert
+        $netExists = docker network ls --filter "name=$sqNet" --format "{{.Name}}" 2>&1
+        if ($netExists -notmatch $sqNet) {
+            docker network create $sqNet 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { Log-Err "Netzwerk '$sqNet' konnte nicht erstellt werden."; return $false }
+            Log-Step "Netzwerk '$sqNet' erstellt."
+        }
         docker run -d `
             --name $sqCont `
             --network $sqNet `
             -p "${sqPort}:9000" `
             -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true `
-            sonarqube:community 2>&1 | Out-Null
+            $Images["sonarqube"] 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) { Log-Err "SonarQube-Container konnte nicht gestartet werden."; return $false }
     } else {
         docker start $sqCont 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) { Log-Err "SonarQube-Container konnte nicht neu gestartet werden."; return $false }
     }
 
     # Warten bis SonarQube UP-Status meldet
@@ -287,7 +319,7 @@ function Run-SonarQube([string]$tgt, [int]$run) {
         --name "bench-sonar-scan-${tgt}-r${run}" `
         --network $sqNet `
         -v "${src}:/usr/src:ro" `
-        sonarsource/sonar-scanner-cli:latest `
+        $Images["sonar-scanner"] `
         sonar-scanner `
             -Dsonar.projectKey=$projKey `
             -Dsonar.projectName="benchmark-$tgt" `
@@ -310,7 +342,7 @@ function Run-SonarQube([string]$tgt, [int]$run) {
             -Headers @{ Authorization = "Basic $b64new" } `
             -UseBasicParsing -EA Stop
         $resp.Content | Set-Content $out -Encoding UTF8
-        Log-Ok "→ $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
+        Log-Ok "-> $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
         return $true
     } catch {
         Log-Err "SonarQube API-Abruf fehlgeschlagen: $_"
@@ -318,7 +350,7 @@ function Run-SonarQube([string]$tgt, [int]$run) {
     }
 }
 
-# ── DAST: OWASP ZAP ───────────────────────────────────────────────────────────
+# -- DAST: OWASP ZAP -----------------------------------------------------------
 
 function Run-ZAP([string]$tgt, [int]$run) {
     $cfg    = $Targets[$tgt]
@@ -326,7 +358,7 @@ function Run-ZAP([string]$tgt, [int]$run) {
     New-Item -ItemType Directory -Force $outDir | Out-Null
     $out    = OutPath "zap" $tgt $run "json"
 
-    Log-Step "Image: ghcr.io/zaproxy/zaproxy:stable"
+    Log-Step "Image: $($Images['zap'])"
 
     # vulnerable-shop hat Automation-Framework-Konfiguration
     $zapYml = Join-Path $cfg.SourcePath ".zap\automation.yml"
@@ -347,7 +379,7 @@ function Run-ZAP([string]$tgt, [int]$run) {
             -v "${tmpYmlDir}:/zap/config:ro" `
             -v "${outDir}:/zap/reports" `
             --add-host "host.docker.internal:host-gateway" `
-            ghcr.io/zaproxy/zaproxy:stable `
+            $Images["zap"] `
             zap.sh -cmd `
                 -autorun "/zap/config/${tmpYmlFile}"
 
@@ -357,8 +389,8 @@ function Run-ZAP([string]$tgt, [int]$run) {
         $rptJson = Get-ChildItem $outDir -Filter "*.json" |
                    Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if ($rptJson) {
-            Copy-Item $rptJson.FullName $out -Force
-            Log-Ok "→ $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
+            Copy-Item $rptJson.FullName $out -Force | Out-Null
+            Log-Ok "-> $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
             return $true
         }
     }
@@ -369,7 +401,7 @@ function Run-ZAP([string]$tgt, [int]$run) {
         --name "bench-zap-fallback-${tgt}-r${run}" `
         -v "${outDir}:/zap/wrk" `
         --add-host "host.docker.internal:host-gateway" `
-        ghcr.io/zaproxy/zaproxy:stable `
+        $Images["zap"] `
         zap-full-scan.py `
             -t $cfg.DockerUrl `
             -J "run_${run}.json" `
@@ -377,11 +409,11 @@ function Run-ZAP([string]$tgt, [int]$run) {
             -x "run_${run}.xml" `
             -l WARN
 
-    if (Test-Path $out) { Log-Ok "→ $out"; return $true }
+    if (Test-Path $out) { Log-Ok "-> $out"; return $true }
     Log-Warn "ZAP: kein Output erzeugt."; return $false
 }
 
-# ── DAST: Nuclei ──────────────────────────────────────────────────────────────
+# -- DAST: Nuclei --------------------------------------------------------------
 
 function Run-Nuclei([string]$tgt, [int]$run) {
     $cfg    = $Targets[$tgt]
@@ -389,27 +421,27 @@ function Run-Nuclei([string]$tgt, [int]$run) {
     New-Item -ItemType Directory -Force $outDir | Out-Null
     $out    = OutPath "nuclei" $tgt $run "json"
 
-    Log-Step "Image: projectdiscovery/nuclei:latest"
+    Log-Step "Image: $($Images['nuclei'])"
 
     docker run --rm `
         --name "bench-nuclei-${tgt}-r${run}" `
         -v "${outDir}:/output" `
         --add-host "host.docker.internal:host-gateway" `
-        projectdiscovery/nuclei:latest `
+        $Images["nuclei"] `
         -u $cfg.DockerUrl `
         -severity "critical,high,medium,low" `
         -json-export "/output/run_${run}.json" `
         -silent
 
-    # Keine Findings ≠ Fehler — leere Datei erstellen
+    # Keine Findings != Fehler -- leere Datei erstellen
     if (-not (Test-Path $out)) {
         "[]" | Set-Content $out -Encoding UTF8
     }
-    Log-Ok "→ $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
+    Log-Ok "-> $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
     return $true
 }
 
-# ── DAST: Burp Dastardly ──────────────────────────────────────────────────────
+# -- DAST: Burp Dastardly ------------------------------------------------------
 
 function Run-Dastardly([string]$tgt, [int]$run) {
     $cfg    = $Targets[$tgt]
@@ -417,7 +449,7 @@ function Run-Dastardly([string]$tgt, [int]$run) {
     New-Item -ItemType Directory -Force $outDir | Out-Null
     $out    = OutPath "dastardly" $tgt $run "xml"
 
-    Log-Step "Image: public.ecr.aws/portswigger/dastardly:latest"
+    Log-Step "Image: $($Images['dastardly'])  [!!] kein Versions-Tagging verfügbar"
     Log-Step "Ziel: $($cfg.DockerUrl)"
 
     docker run --rm `
@@ -426,15 +458,15 @@ function Run-Dastardly([string]$tgt, [int]$run) {
         --add-host "host.docker.internal:host-gateway" `
         -e BURP_START_URL=$cfg.DockerUrl `
         -e BURP_REPORT_FILE_PATH="/dastardly-reports/run_${run}.xml" `
-        public.ecr.aws/portswigger/dastardly:latest
+        $Images["dastardly"]
     # Exit-Code 1 bei Findings ist normal
 
-    if (Test-Path $out) { Log-Ok "→ $out (JUnit-XML)"; return $true }
+    if (Test-Path $out) { Log-Ok "-> $out (JUnit-XML)"; return $true }
     Log-Warn "Dastardly: kein Report. Prüfe ob App auf $($cfg.DockerUrl) erreichbar ist."
     return $false
 }
 
-# ── SCA: OWASP Dependency-Check ───────────────────────────────────────────────
+# -- SCA: OWASP Dependency-Check -----------------------------------------------
 
 function Run-DependencyCheck([string]$tgt, [int]$run) {
     $cfg    = $Targets[$tgt]
@@ -445,37 +477,48 @@ function Run-DependencyCheck([string]$tgt, [int]$run) {
     $out    = OutPath "dependency-check" $tgt $run "json"
     $cache  = Abs $DcCacheDir
 
-    Log-Step "Image: owasp/dependency-check:latest"
+    Log-Step "Image: $($Images['dependency-check'])"
     Log-Step "NVD-Cache: $DcCacheDir (zwischen Runs geteilt)"
+
+    $nvdArgs = @()
+    if ($env:NVD_API_KEY) {
+        Log-Step "NVD API-Key gesetzt -- Rate-Limit aufgehoben."
+        $nvdArgs = @("--nvdApiKey", $env:NVD_API_KEY)
+    } else {
+        Log-Warn "NVD_API_KEY nicht gesetzt -- Download sehr langsam. Empfehlung: `$env:NVD_API_KEY='...' setzen."
+    }
 
     docker run --rm `
         --name "bench-depcheck-${tgt}-r${run}" `
+        -e "JAVA_OPTS=-Xmx4g" `
         -v "${src}:/src:ro" `
         -v "${outDir}:/report" `
         -v "${cache}:/usr/share/dependency-check/data" `
-        owasp/dependency-check:latest `
+        $Images["dependency-check"] `
         --scan /src `
+        --exclude "**/node_modules/**" `
         --format JSON `
         --format SARIF `
         --out /report `
         --project "benchmark-${tgt}" `
         --enableExperimental `
-        --failOnCVSS 0
+        --failOnCVSS 0 `
+        @nvdArgs
 
     $srcJson  = Join-Path $outDir "dependency-check-report.json"
     $srcSarif = Join-Path $outDir "dependency-check-report.sarif"
 
     if (Test-Path $srcSarif) {
-        Copy-Item $srcSarif (OutPath "dependency-check" $tgt $run "sarif") -Force
+        Copy-Item $srcSarif (OutPath "dependency-check" $tgt $run "sarif") -Force | Out-Null
     }
     if (Test-Path $srcJson) {
-        Copy-Item $srcJson $out -Force
-        Log-Ok "→ $out (+ .sarif wenn erzeugt)"; return $true
+        Copy-Item $srcJson $out -Force | Out-Null
+        Log-Ok "-> $out (+ .sarif wenn erzeugt)"; return $true
     }
     Log-Warn "Dependency-Check: kein Report."; return $false
 }
 
-# ── SCA: Snyk ─────────────────────────────────────────────────────────────────
+# -- SCA: Snyk -----------------------------------------------------------------
 
 function Run-Snyk([string]$tgt, [int]$run) {
     $cfg = $Targets[$tgt]
@@ -483,32 +526,32 @@ function Run-Snyk([string]$tgt, [int]$run) {
     $out = OutPath "snyk" $tgt $run "json"
 
     if (-not $env:SNYK_TOKEN) {
-        Log-Warn "SNYK_TOKEN nicht gesetzt — Snyk übersprungen."
+        Log-Warn "SNYK_TOKEN nicht gesetzt -- Snyk übersprungen."
         Log-Warn "Token kostenlos: https://app.snyk.io/account | dann: `$env:SNYK_TOKEN='dein-token'"
         return $false
     }
 
-    Log-Step "Image: snyk/snyk:node"
+    Log-Step "Image: $($Images['snyk'])"
 
-    # Snyk gibt Exit-Code 1 bei Findings — Ausgabe in Datei umleiten
+    # Snyk gibt Exit-Code 1 bei Findings -- Ausgabe in Datei umleiten
     $tmpOut = Join-Path $env:TEMP "snyk_${tgt}_r${run}.json"
     docker run --rm `
         --name "bench-snyk-${tgt}-r${run}" `
         -v "${src}:/project:ro" `
         -e "SNYK_TOKEN=$env:SNYK_TOKEN" `
         -w /project `
-        snyk/snyk:node `
+        $Images["snyk"] `
         snyk test --json --all-projects 2>&1 | Set-Content $tmpOut -Encoding UTF8
 
     if (Test-Path $tmpOut) {
         Move-Item $tmpOut $out -Force
-        Log-Ok "→ $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
+        Log-Ok "-> $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
         return $true
     }
     return $false
 }
 
-# ── SCA: npm audit ────────────────────────────────────────────────────────────
+# -- SCA: npm audit ------------------------------------------------------------
 
 function Run-NpmAudit([string]$tgt, [int]$run) {
     $cfg = $Targets[$tgt]
@@ -521,16 +564,16 @@ function Run-NpmAudit([string]$tgt, [int]$run) {
 
     Log-Step "npm audit --json (nativ, kein Docker)"
     Push-Location $src
-    # npm audit gibt Exit-Code 1 bei Findings — das ist normales Verhalten
+    # npm audit gibt Exit-Code 1 bei Findings -- das ist normales Verhalten
     $result = & npm audit --json 2>&1
     $result | Set-Content $out -Encoding UTF8
     Pop-Location
 
-    Log-Ok "→ $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
+    Log-Ok "-> $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
     return (Test-Path $out)
 }
 
-# ── Tool-Dispatcher ───────────────────────────────────────────────────────────
+# -- Tool-Dispatcher -----------------------------------------------------------
 
 function Invoke-Tool([string]$tool, [string]$tgt, [int]$run) {
     Log-Header "$tool | $tgt | Run $run"
@@ -568,7 +611,7 @@ function Invoke-Tool([string]$tool, [string]$tgt, [int]$run) {
     return $ok
 }
 
-# ── Haupt-Orchestrierung ──────────────────────────────────────────────────────
+# -- Haupt-Orchestrierung ------------------------------------------------------
 
 New-Item -ItemType Directory -Force $ResultsDir | Out-Null
 
@@ -576,12 +619,12 @@ $toolList   = if ($Tool   -eq "all") { $AllTools }                          else
 $targetList = if ($Target -eq "all") { @("vulnerable-shop","juice-shop") }  else { @($Target) }
 $runList    = if ($Run    -gt 0)    { @($Run) }                             else { 1..$Runs }
 
-$needsDast = ($toolList | Where-Object { $DastTools -contains $_ }).Count -gt 0
+$needsDast = @($toolList | Where-Object { $DastTools -contains $_ }).Count -gt 0
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor White
-Write-Host "║   BA Security Benchmark — lokaler Runner                        ║" -ForegroundColor White
-Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor White
+Write-Host "+==================================================================+" -ForegroundColor White
+Write-Host "|   BA Security Benchmark -- lokaler Runner                        |" -ForegroundColor White
+Write-Host "+==================================================================+" -ForegroundColor White
 Write-Host "  Tools:    $($toolList -join ', ')"
 Write-Host "  Targets:  $($targetList -join ', ')"
 Write-Host "  Runs:     $($runList -join ', ')"
@@ -593,12 +636,12 @@ if (-not $SkipStartup -and $needsDast) {
     Write-Host "  Starte Ziel-Applikationen..." -ForegroundColor Cyan
     foreach ($t in $targetList) { Start-AppTarget $t }
 } elseif ($SkipStartup) {
-    Log-Step "-SkipStartup gesetzt — Targets werden nicht gestartet."
+    Log-Step "-SkipStartup gesetzt -- Targets werden nicht gestartet."
 } else {
-    Log-Step "Keine DAST-Tools im Einsatz — Targets müssen nicht laufen."
+    Log-Step "Keine DAST-Tools im Einsatz -- Targets müssen nicht laufen."
 }
 
-$total  = $toolList.Count * $targetList.Count * $runList.Count
+$total  = @($toolList).Count * @($targetList).Count * @($runList).Count
 $done   = 0
 $failed = [System.Collections.Generic.List[string]]::new()
 
@@ -618,9 +661,9 @@ $allOk = $failed.Count -eq 0
 $summaryColor = if ($allOk) { "Green" } else { "Yellow" }
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor $summaryColor
-Write-Host "║   BENCHMARK ABGESCHLOSSEN                                        ║" -ForegroundColor $summaryColor
-Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor $summaryColor
+Write-Host "+==================================================================+" -ForegroundColor $summaryColor
+Write-Host "|   BENCHMARK ABGESCHLOSSEN                                        |" -ForegroundColor $summaryColor
+Write-Host "+==================================================================+" -ForegroundColor $summaryColor
 Write-Host "  Runs gesamt:    $total"
 Write-Host "  Erfolgreich:    $($total - $failed.Count)"
 Write-Host "  Fehlgeschlagen: $($failed.Count)"
@@ -630,7 +673,7 @@ Write-Host "  Timing-Log:     $TimingFile"
 if ($failed.Count -gt 0) {
     Write-Host ""
     Write-Host "  Fehlgeschlagene Runs:" -ForegroundColor Yellow
-    $failed | ForEach-Object { Write-Host "    ✗ $_" -ForegroundColor Yellow }
+    $failed | ForEach-Object { Write-Host "    [XX] $_" -ForegroundColor Yellow }
 }
 
 Write-Host ""
