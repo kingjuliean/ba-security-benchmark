@@ -381,60 +381,6 @@ jobs:
           name: result-snyk-run-${{ env.RUN_NUMBER }}
           path: benchmark/results/snyk/
 
-  # ── SCA: OWASP Dependency-Check ──────────────────────────────────────────────
-  sca-dependency-check:
-    name: "SCA · OWASP Dependency-Check"
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.2.2
-
-      - name: "[TIMING] Scan-Start"
-        id: t_start
-        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
-
-      - name: OWASP Dependency-Check
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: |
-          mkdir -p benchmark/results/dependency-check/vulnerable-shop
-          docker run --rm \
-            -v "$(pwd)/targets/vulnerable-shop/Shop:/src:ro" \
-            -v "$(pwd)/benchmark/results/dependency-check/vulnerable-shop:/report" \
-            owasp/dependency-check:10.0.4 \
-            --scan /src \
-            --format "JSON" \
-            --format "SARIF" \
-            --out /report \
-            --project "benchmark-vulnerable-shop" \
-            --enableExperimental \
-            --nvdApiDelay 0 \
-            ${NVD_API_KEY:+--nvdApiKey "$NVD_API_KEY"} \
-            || true
-
-      - name: Benenne Output einheitlich
-        run: |
-          dir="benchmark/results/dependency-check/vulnerable-shop"
-          [ -f "${dir}/dependency-check-report.json" ] && \
-            cp "${dir}/dependency-check-report.json" "${dir}/run_${{ env.RUN_NUMBER }}.json" || true
-          [ -f "${dir}/dependency-check-report.sarif" ] && \
-            cp "${dir}/dependency-check-report.sarif" "${dir}/run_${{ env.RUN_NUMBER }}.sarif" || true
-
-      - name: "[TIMING] Scan-Ende → CSV"
-        run: |
-          end=$(date +%s)
-          duration=$((end - ${{ steps.t_start.outputs.start }}))
-          echo "dependency-check,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            >> benchmark/results/timing_ci.csv
-
-      - name: Upload Reports als Artifact
-        uses: actions/upload-artifact@v4.6.2
-        if: always()
-        with:
-          name: result-dependency-check-run-${{ env.RUN_NUMBER }}
-          path: benchmark/results/dependency-check/
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STAGE 4 — Deploy (startet Targets für DAST)
@@ -442,7 +388,7 @@ jobs:
   deploy:
     name: "Deploy Targets"
     runs-on: ubuntu-latest
-    needs: [sast-semgrep, sast-codeql, sast-sonarqube, sca-npm-audit, sca-snyk, sca-dependency-check]
+    needs: [sast-semgrep, sast-codeql, sast-sonarqube, sca-npm-audit, sca-snyk]
     outputs:
       vulnerable_shop_url: "http://localhost:3001"
       juice_shop_url:       "http://localhost:3000"
