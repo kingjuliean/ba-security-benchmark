@@ -86,7 +86,7 @@ jobs:
           echo "Build-Dauer: ${duration}s"
 
       - name: Cache node_modules für nachfolgende Jobs
-        uses: actions/cache@v4.2.0.2.0
+        uses: actions/cache@v4.2.0
         with:
           path: targets/vulnerable-shop/Shop/node_modules
           key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
