@@ -315,34 +315,51 @@ function Run-SonarQube([string]$tgt, [int]$run) {
     } catch {}
 
     # Scanner-Container im selben Netzwerk ausführen
+    # sonar-scanner-cli 11+ erwartet Konfiguration per Umgebungsvariablen,
+    # nicht als -Dsonar.* Kommandozeilenargumente.
+    $scannerOpts = "-Dsonar.projectKey=$projKey" +
+                   " -Dsonar.projectName=benchmark-$tgt" +
+                   " -Dsonar.sources=/usr/src" +
+                   " -Dsonar.scm.disabled=true" +
+                   " -Dsonar.javascript.node.maxspace=2048" +
+                   " -Dsonar.login=admin" +
+                   " -Dsonar.password=$sqPass"
+
     docker run --rm `
         --name "bench-sonar-scan-${tgt}-r${run}" `
         --network $sqNet `
         -v "${src}:/usr/src:ro" `
-        $Images["sonar-scanner"] `
-        sonar-scanner `
-            -Dsonar.projectKey=$projKey `
-            -Dsonar.projectName="benchmark-$tgt" `
-            -Dsonar.sources=/usr/src `
-            "-Dsonar.host.url=http://${sqCont}:9000" `
-            -Dsonar.login=admin `
-            "-Dsonar.password=$sqPass" `
-            -Dsonar.scm.disabled=true `
-            -Dsonar.javascript.node.maxspace=2048
+        -e "SONAR_HOST_URL=http://${sqCont}:9000" `
+        -e "SONAR_SCANNER_OPTS=$scannerOpts" `
+        $Images["sonar-scanner"]
 
-    # Auf Background-Analyse-Task warten
-    Start-Sleep 20
+    # Auf Background-Analyse-Task warten (juice-shop braucht laenger als vulnerable-shop)
+    $waitSec = if ($tgt -eq "juice-shop") { 90 } else { 60 }
+    Log-Step "Warte ${waitSec}s auf Analyse-Task..."
+    Start-Sleep $waitSec
 
-    # Issues per REST-API abrufen und als JSON speichern
+    # Issues per REST-API abrufen (paginiert, max. ps=500 pro Seite) und als JSON speichern
     $b64new = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("admin:$sqPass"))
     try {
-        $issueUrl = "http://localhost:${sqPort}/api/issues/search" +
-                    "?componentKeys=${projKey}&ps=500&resolved=false"
-        $resp = Invoke-WebRequest $issueUrl `
-            -Headers @{ Authorization = "Basic $b64new" } `
-            -UseBasicParsing -EA Stop
-        $resp.Content | Set-Content $out -Encoding UTF8
-        Log-Ok "-> $out (JSON; Konvertierung zu SARIF via analysis/convert_to_sarif.py)"
+        $allIssues = [System.Collections.Generic.List[object]]::new()
+        $page  = 1
+        $total = 1  # Startwert; wird nach erster Antwort überschrieben
+        do {
+            $issueUrl = "http://localhost:${sqPort}/api/issues/search" +
+                        "?componentKeys=${projKey}&ps=500&p=${page}&resolved=false"
+            $resp = Invoke-RestMethod $issueUrl `
+                -Headers @{ Authorization = "Basic $b64new" } `
+                -EA Stop
+            $total = $resp.total
+            foreach ($issue in $resp.issues) { $allIssues.Add($issue) }
+            Log-Step "Seite $page geladen ($($allIssues.Count)/$total Issues)"
+            $page++
+        } while ($allIssues.Count -lt $total)
+
+        @{ total = $total; issues = $allIssues } |
+            ConvertTo-Json -Depth 10 -Compress |
+            Set-Content $out -Encoding UTF8
+        Log-Ok "-> $out ($total Issues, JSON)"
         return $true
     } catch {
         Log-Err "SonarQube API-Abruf fehlgeschlagen: $_"
@@ -431,6 +448,9 @@ function Run-Nuclei([string]$tgt, [int]$run) {
         -u $cfg.DockerUrl `
         -severity "critical,high,medium,low" `
         -json-export "/output/run_${run}.json" `
+        -rl 20 `
+        -c 5 `
+        -timeout 10 `
         -silent
 
     # Keine Findings != Fehler -- leere Datei erstellen
@@ -503,6 +523,7 @@ function Run-DependencyCheck([string]$tgt, [int]$run) {
         --project "benchmark-${tgt}" `
         --enableExperimental `
         --failOnCVSS 0 `
+        --noupdate `
         @nvdArgs
 
     $srcJson  = Join-Path $outDir "dependency-check-report.json"
@@ -533,6 +554,18 @@ function Run-Snyk([string]$tgt, [int]$run) {
 
     Log-Step "Image: $($Images['snyk'])"
 
+    # node_modules muss vorhanden sein damit Snyk Abhaengigkeiten aufloesen kann.
+    # Bei reinen Git-Clones (z.B. juice-shop) einmalig npm install ausfuehren.
+    if (-not (Test-Path (Join-Path $src "node_modules"))) {
+        Log-Step "node_modules fehlt -- npm install (einmalig, kann einige Minuten dauern)..."
+        Push-Location $src
+        npm install --ignore-scripts --no-audit 2>&1 | Out-Null
+        Pop-Location
+        if (-not (Test-Path (Join-Path $src "node_modules"))) {
+            Log-Err "npm install fehlgeschlagen -- Snyk uebersprungen."; return $false
+        }
+    }
+
     # Snyk gibt Exit-Code 1 bei Findings -- Ausgabe in Datei umleiten
     $tmpOut = Join-Path $env:TEMP "snyk_${tgt}_r${run}.json"
     docker run --rm `
@@ -541,7 +574,7 @@ function Run-Snyk([string]$tgt, [int]$run) {
         -e "SNYK_TOKEN=$env:SNYK_TOKEN" `
         -w /project `
         $Images["snyk"] `
-        snyk test --json --all-projects 2>&1 | Set-Content $tmpOut -Encoding UTF8
+        snyk test --json --file=package.json 2>&1 | Set-Content $tmpOut -Encoding UTF8
 
     if (Test-Path $tmpOut) {
         Move-Item $tmpOut $out -Force

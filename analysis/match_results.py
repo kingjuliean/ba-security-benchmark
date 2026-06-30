@@ -30,6 +30,9 @@ OUTPUT_JSON     = RESULTS_DIR / "match_results.json"
 
 LINE_TOLERANCE = 5  # ±5 Zeilen für SAST-Matching
 
+# Ground Truth existiert nur für vulnerable-shop — juice-shop wird nicht gematcht
+GROUND_TRUTH_TARGET = "vulnerable-shop"
+
 TOOL_TYPE = {
     "semgrep":           "SAST",
     "codeql":            "SAST",
@@ -125,13 +128,14 @@ class Finding:
 @dataclass
 class MatchResult:
     """TP/FP/FN/TN-Ergebnis für eine (Tool, Target, Run)-Kombination."""
-    tool:       str
-    target:     str
-    run:        int
-    tp_ids:     List[str] = field(default_factory=list)   # gematchte echte Vuln-IDs
-    fp_details: List[str] = field(default_factory=list)   # Beschreibung jedes FP
-    fn_ids:     List[str] = field(default_factory=list)   # verpasste Vuln-IDs
-    tn_ids:     List[str] = field(default_factory=list)   # korrekt ignorierte Köder
+    tool:         str
+    target:       str
+    run:          int
+    tp_ids:       List[str] = field(default_factory=list)   # gematchte echte Vuln-IDs
+    fp_details:   List[str] = field(default_factory=list)   # Köder-Treffer (FP)
+    fn_ids:       List[str] = field(default_factory=list)   # verpasste Vuln-IDs
+    tn_ids:       List[str] = field(default_factory=list)   # korrekt ignorierte Köder
+    bonus_finds:  int = 0                                   # Findings außerhalb Ground Truth
 
     @property
     def tp(self) -> int: return len(self.tp_ids)
@@ -216,7 +220,7 @@ def parse_ground_truth(path: Path) -> List[GTEntry]:
     Erwartet Zeilen im Format:
     | V01 | Typ | CWE-89 | A03 | `src/routes/auth.js` | 41 | SAST+DAST | Echt |
     """
-    text = path.read_text(encoding="utf-8")
+    text = path.read_text(encoding="utf-8-sig")
 
     row_re = re.compile(
         r"^\|\s*(V\d+|K\d+)\s*\|"   # ID
@@ -319,7 +323,7 @@ def _extract_cwes(result: dict, rules: dict) -> List[str]:
 
 def parse_sarif(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (json.JSONDecodeError, OSError) as exc:
         print(f"    [WARN] SARIF-Parse-Fehler: {exc}")
         return []
@@ -345,7 +349,7 @@ def parse_sarif(path: Path, tool: str, target: str, run: int) -> List[Finding]:
 
 def parse_sonarqube_json(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (json.JSONDecodeError, OSError) as exc:
         print(f"    [WARN] SonarQube-Parse-Fehler: {exc}")
         return []
@@ -369,7 +373,7 @@ def parse_sonarqube_json(path: Path, tool: str, target: str, run: int) -> List[F
 
 def parse_zap_json(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (json.JSONDecodeError, OSError) as exc:
         print(f"    [WARN] ZAP-Parse-Fehler: {exc}")
         return []
@@ -399,7 +403,7 @@ def parse_zap_json(path: Path, tool: str, target: str, run: int) -> List[Finding
 
 def parse_nuclei_json(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        text = path.read_text(encoding="utf-8").strip()
+        text = path.read_text(encoding="utf-8-sig").strip()
     except OSError as exc:
         print(f"    [WARN] Nuclei-Parse-Fehler: {exc}")
         return []
@@ -437,7 +441,7 @@ def parse_nuclei_json(path: Path, tool: str, target: str, run: int) -> List[Find
 
 def parse_npm_audit_json(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (json.JSONDecodeError, OSError) as exc:
         print(f"    [WARN] npm-audit-Parse-Fehler: {exc}")
         return []
@@ -459,7 +463,7 @@ def parse_npm_audit_json(path: Path, tool: str, target: str, run: int) -> List[F
 
 def parse_snyk_json(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (json.JSONDecodeError, OSError) as exc:
         print(f"    [WARN] Snyk-Parse-Fehler: {exc}")
         return []
@@ -480,7 +484,7 @@ def parse_snyk_json(path: Path, tool: str, target: str, run: int) -> List[Findin
 
 def parse_dependency_check_json(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
     except (json.JSONDecodeError, OSError) as exc:
         print(f"    [WARN] DepCheck-Parse-Fehler: {exc}")
         return []
@@ -509,7 +513,11 @@ def parse_dependency_check_json(path: Path, tool: str, target: str, run: int) ->
 
 def parse_dastardly_xml(path: Path, tool: str, target: str, run: int) -> List[Finding]:
     try:
-        tree = ET.parse(str(path))
+        # Strip invalid XML character references (e.g. &#x1F; &#0;) before parsing
+        content = path.read_text(encoding="utf-8-sig", errors="replace")
+        content = re.sub(r"&#(?:x[0-9A-Fa-f]+|\d+);", "", content)
+        tree = ET.fromstring(content)
+        tree = ET.ElementTree(tree)
     except ET.ParseError as exc:
         print(f"    [WARN] Dastardly-XML-Parse-Fehler: {exc}")
         return []
@@ -548,6 +556,10 @@ def _dispatch_json(path: Path, tool: str, target: str, run: int) -> List[Finding
     return []
 
 
+_JSON_PREFERRED_TOOLS = {"sonarqube", "zap", "nuclei", "npm-audit", "snyk", "dependency-check"}
+_XML_ONLY_TOOLS       = {"dastardly"}
+
+
 def load_findings(
     results_dir: Path,
     filter_tool:   str = "",
@@ -581,8 +593,15 @@ def load_findings(
                 if filter_run and run != filter_run:
                     continue
 
-                print(f"  Lade {result_file.relative_to(results_dir)}", end="")
                 ext = result_file.suffix.lower()
+
+                # Avoid double-parsing: tools with JSON parser skip .sarif/.xml duplicates
+                if ext == ".sarif" and tool in _JSON_PREFERRED_TOOLS:
+                    continue
+                if ext == ".xml" and tool not in _XML_ONLY_TOOLS:
+                    continue
+
+                print(f"  Lade {result_file.relative_to(results_dir)}", end="")
 
                 if ext == ".sarif":
                     findings = parse_sarif(result_file, tool, target, run)
@@ -597,6 +616,45 @@ def load_findings(
                 all_findings.extend(findings)
 
     return all_findings
+
+
+def discover_all_combos(
+    results_dir: Path,
+    filter_tool:   str = "",
+    filter_target: str = "",
+    filter_run:    int = 0,
+) -> set:
+    """Gibt alle (tool, target, run)-Tupel zurück, für die Ergebnisdateien existieren."""
+    combos = set()
+    for tool_dir in sorted(results_dir.iterdir()):
+        if not tool_dir.is_dir():
+            continue
+        tool = tool_dir.name
+        if filter_tool and tool != filter_tool:
+            continue
+        if tool not in TOOL_TYPE:
+            continue
+        for target_dir in sorted(tool_dir.iterdir()):
+            if not target_dir.is_dir():
+                continue
+            target = target_dir.name
+            if filter_target and target != filter_target:
+                continue
+            for result_file in sorted(target_dir.iterdir()):
+                m = re.match(r"run_(\d+)\.(sarif|json|xml)$", result_file.name)
+                if not m:
+                    continue
+                ext = result_file.suffix.lower()
+                # Use same skip logic as load_findings
+                if ext == ".sarif" and tool in _JSON_PREFERRED_TOOLS:
+                    continue
+                if ext == ".xml" and tool not in _XML_ONLY_TOOLS:
+                    continue
+                run = int(m.group(1))
+                if filter_run and run != filter_run:
+                    continue
+                combos.add((tool, target, run))
+    return combos
 
 
 # ── Matching-Logik ─────────────────────────────────────────────────────────────
@@ -716,14 +774,11 @@ def match_findings(
                     f"file={finding.file_uri}:{finding.start_line})"
                 )
 
-        # Finding ohne jeglichen GT-Treffer → FP
+        # Finding ohne jeglichen GT-Treffer → Bonus Find (kein FP)
+        # FP zählt nur für Köder-Treffer; Findings außerhalb der Ground Truth
+        # werden nicht bestraft, da die Ground Truth möglicherweise unvollständig ist.
         if not matched_any:
-            result.fp_details.append(
-                f"Kein GT-Match: rule={finding.rule_id} "
-                f"cwe={finding.cwe_ids} "
-                f"file={finding.file_uri}:{finding.start_line} "
-                f"ep={finding.endpoint} pkg={finding.package}"
-            )
+            result.bonus_finds += 1
 
     result.tp_ids  = sorted(matched_vuln_ids)
     result.fn_ids  = sorted(set(real_vulns) - matched_vuln_ids)
@@ -739,7 +794,7 @@ def print_result(r: MatchResult, verbose: bool = False) -> None:
     print(f"\n  {bar}")
     print(f"  {r.tool:22s}  {r.target:18s}  Run {r.run}")
     print(f"  {bar}")
-    print(f"  TP={r.tp:3d}  FP={r.fp:3d}  FN={r.fn:3d}  TN={r.tn:3d}")
+    print(f"  TP={r.tp:3d}  FP={r.fp:3d}  FN={r.fn:3d}  TN={r.tn:3d}  Bonus={r.bonus_finds:3d}")
     if r.tp_ids:
         print(f"  TP : {', '.join(r.tp_ids)}")
     if r.fn_ids:
@@ -757,17 +812,18 @@ def print_result(r: MatchResult, verbose: bool = False) -> None:
 def results_to_dict(results: List[MatchResult]) -> List[dict]:
     return [
         {
-            "tool":       r.tool,
-            "target":     r.target,
-            "run":        r.run,
-            "TP":         r.tp,
-            "FP":         r.fp,
-            "FN":         r.fn,
-            "TN":         r.tn,
-            "tp_ids":     r.tp_ids,
-            "fn_ids":     r.fn_ids,
-            "tn_ids":     r.tn_ids,
-            "fp_details": r.fp_details,
+            "tool":         r.tool,
+            "target":       r.target,
+            "run":          r.run,
+            "TP":           r.tp,
+            "FP":           r.fp,
+            "FN":           r.fn,
+            "TN":           r.tn,
+            "bonus_finds":  r.bonus_finds,
+            "tp_ids":       r.tp_ids,
+            "fn_ids":       r.fn_ids,
+            "tn_ids":       r.tn_ids,
+            "fp_details":   r.fp_details,
         }
         for r in results
     ]
@@ -810,18 +866,26 @@ def main() -> None:
         filter_target=args.target,
         filter_run=args.run,
     )
-    print(f"  → {len(findings)} Findings insgesamt")
 
-    if not findings:
-        print("  Keine Findings gefunden — nichts zu matchen.")
-        raise SystemExit(0)
+    # Alle (Tool, Target, Run)-Kombinationen: aus Findings PLUS alle Ergebnisdateien
+    # (Tools mit 0 Findings werden sonst stillschweigend übergangen)
+    # Nur GROUND_TRUTH_TARGET — juice-shop hat keine Ground Truth und wird nicht gematcht.
+    combos_from_findings = {(f.tool, f.target, f.run) for f in findings
+                            if f.target == GROUND_TRUTH_TARGET}
+    combos_from_files    = discover_all_combos(
+        RESULTS_DIR,
+        filter_tool=args.tool,
+        filter_target=args.target or GROUND_TRUTH_TARGET,
+        filter_run=args.run,
+    )
+    all_combos = sorted(combos_from_findings | combos_from_files)
+    print(f"  → {len(findings)} Findings insgesamt, {len(all_combos)} Kombinationen")
 
     # Alle (Tool, Target, Run)-Kombinationen matchen
     print("\n  Matching...")
-    combos = sorted({(f.tool, f.target, f.run) for f in findings})
     results: List[MatchResult] = []
 
-    for tool, target, run in combos:
+    for tool, target, run in all_combos:
         mr = match_findings(findings, gt_entries, tool, target, run)
         results.append(mr)
         print_result(mr, verbose=args.verbose)
@@ -830,7 +894,7 @@ def main() -> None:
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_JSON.write_text(
         json.dumps(results_to_dict(results), indent=2, ensure_ascii=False),
-        encoding="utf-8",
+        encoding="utf-8-sig",
     )
 
     print(f"\n  Ergebnisse gespeichert: {OUTPUT_JSON}")

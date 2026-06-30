@@ -100,10 +100,10 @@ def aggregate_runs(run_metrics: List[Dict]) -> Dict:
 
     # Rohe Confusion-Matrix über alle Runs summieren
     agg = {
-        "tp_total": sum(r["tp"] for r in run_metrics),
-        "fp_total": sum(r["fp"] for r in run_metrics),
-        "fn_total": sum(r["fn"] for r in run_metrics),
-        "tn_total": sum(r["tn"] for r in run_metrics),
+        "tp_total": sum(r["TP"] for r in run_metrics),
+        "fp_total": sum(r["FP"] for r in run_metrics),
+        "fn_total": sum(r["FN"] for r in run_metrics),
+        "tn_total": sum(r["TN"] for r in run_metrics),
         "run_count": len(run_metrics),
     }
 
@@ -216,15 +216,16 @@ def build_output(all_results: List[Dict]) -> List[Dict]:
         for r in runs:
             m = calculate_metrics(r["TP"], r["FP"], r["FN"], r["TN"])
             run_details.append({
-                "run":       r["run"],
-                "TP":        r["TP"],
-                "FP":        r["FP"],
-                "FN":        r["FN"],
-                "TN":        r["TN"],
-                "recall":    m["recall"],
-                "precision": m["precision"],
-                "f1":        m["f1"],
-                "youden":    m["youden"],
+                "run":         r["run"],
+                "TP":          r["TP"],
+                "FP":          r["FP"],
+                "FN":          r["FN"],
+                "TN":          r["TN"],
+                "bonus_finds": r.get("bonus_finds", 0),
+                "recall":      m["recall"],
+                "precision":   m["precision"],
+                "f1":          m["f1"],
+                "youden":      m["youden"],
                 "specificity": m["specificity"],
             })
 
@@ -264,10 +265,10 @@ def write_csv(output: List[Dict], path: Path) -> None:
     """
     fieldnames = [
         "tool", "target", "run",
-        "TP", "FP", "FN", "TN",
+        "TP", "FP", "FN", "TN", "bonus_finds",
         "recall", "precision", "f1", "youden", "specificity",
     ]
-    with path.open("w", newline="", encoding="utf-8") as fh:
+    with path.open("w", newline="", encoding="utf-8-sig") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()
         for entry in output:
@@ -280,6 +281,7 @@ def write_csv(output: List[Dict], path: Path) -> None:
                     "FP":          run["FP"],
                     "FN":          run["FN"],
                     "TN":          run["TN"],
+                    "bonus_finds": run.get("bonus_finds", ""),
                     "recall":      _fmt(run["recall"]) if run["recall"] is not None else "",
                     "precision":   _fmt(run["precision"]) if run["precision"] is not None else "",
                     "f1":          _fmt(run["f1"]) if run["f1"] is not None else "",
@@ -311,8 +313,11 @@ def main() -> None:
         print("  Bitte zuerst: python analysis/match_results.py")
         raise SystemExit(1)
 
-    all_results: List[Dict] = json.loads(input_path.read_text(encoding="utf-8"))
-    print(f"\n  Input: {input_path} ({len(all_results)} Einträge)")
+    all_results: List[Dict] = json.loads(input_path.read_text(encoding="utf-8-sig"))
+    # Nur vulnerable-shop: Ground Truth existiert nur für dieses Target.
+    # Timing für juice-shop wird separat in results_collector.py berücksichtigt.
+    all_results = [r for r in all_results if r.get("target") == "vulnerable-shop"]
+    print(f"\n  Input: {input_path} ({len(all_results)} Einträge, nur vulnerable-shop)")
 
     # Haupttabelle
     print_metrics_table(all_results)
@@ -328,7 +333,7 @@ def main() -> None:
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_JSON.write_text(
         json.dumps(output, indent=2, ensure_ascii=False, default=lambda x: None),
-        encoding="utf-8",
+        encoding="utf-8-sig",
     )
     print(f"  Metriken (JSON):  {OUTPUT_JSON}")
 

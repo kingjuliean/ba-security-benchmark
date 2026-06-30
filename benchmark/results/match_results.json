@@ -1,0 +1,686 @@
+﻿[
+  {
+    "tool": "dastardly",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 2,
+    "FP": 0,
+    "FN": 11,
+    "TN": 1,
+    "bonus_finds": 0,
+    "tp_ids": [
+      "V03",
+      "V04"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "dastardly",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 2,
+    "FP": 0,
+    "FN": 11,
+    "TN": 1,
+    "bonus_finds": 0,
+    "tp_ids": [
+      "V03",
+      "V04"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "dastardly",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 2,
+    "FP": 0,
+    "FN": 11,
+    "TN": 1,
+    "bonus_finds": 0,
+    "tp_ids": [
+      "V03",
+      "V04"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "dependency-check",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 82,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "dependency-check",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 82,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "dependency-check",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 82,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "npm-audit",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 52,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "npm-audit",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 52,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "npm-audit",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 52,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "nuclei",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 0,
+    "FP": 0,
+    "FN": 13,
+    "TN": 1,
+    "bonus_finds": 0,
+    "tp_ids": [],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "nuclei",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 0,
+    "FP": 0,
+    "FN": 13,
+    "TN": 1,
+    "bonus_finds": 0,
+    "tp_ids": [],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "nuclei",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 0,
+    "FP": 0,
+    "FN": 13,
+    "TN": 1,
+    "bonus_finds": 0,
+    "tp_ids": [],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "semgrep",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 1,
+    "FP": 0,
+    "FN": 9,
+    "TN": 10,
+    "bonus_finds": 9,
+    "tp_ids": [
+      "V06"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V07",
+      "V08",
+      "V12",
+      "V14"
+    ],
+    "tn_ids": [
+      "K01",
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06",
+      "K07",
+      "K08",
+      "K09",
+      "K10"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "semgrep",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 1,
+    "FP": 0,
+    "FN": 9,
+    "TN": 10,
+    "bonus_finds": 9,
+    "tp_ids": [
+      "V06"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V07",
+      "V08",
+      "V12",
+      "V14"
+    ],
+    "tn_ids": [
+      "K01",
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06",
+      "K07",
+      "K08",
+      "K09",
+      "K10"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "semgrep",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 1,
+    "FP": 0,
+    "FN": 9,
+    "TN": 10,
+    "bonus_finds": 9,
+    "tp_ids": [
+      "V06"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V07",
+      "V08",
+      "V12",
+      "V14"
+    ],
+    "tn_ids": [
+      "K01",
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06",
+      "K07",
+      "K08",
+      "K09",
+      "K10"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "snyk",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 90,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "snyk",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 90,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "snyk",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 4,
+    "FP": 0,
+    "FN": 1,
+    "TN": 0,
+    "bonus_finds": 90,
+    "tp_ids": [
+      "V16",
+      "V17",
+      "V19",
+      "V20"
+    ],
+    "fn_ids": [
+      "V18"
+    ],
+    "tn_ids": [],
+    "fp_details": []
+  },
+  {
+    "tool": "sonarqube",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 0,
+    "FP": 0,
+    "FN": 10,
+    "TN": 10,
+    "bonus_finds": 1204,
+    "tp_ids": [],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V06",
+      "V07",
+      "V08",
+      "V12",
+      "V14"
+    ],
+    "tn_ids": [
+      "K01",
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06",
+      "K07",
+      "K08",
+      "K09",
+      "K10"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "sonarqube",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 0,
+    "FP": 0,
+    "FN": 10,
+    "TN": 10,
+    "bonus_finds": 1204,
+    "tp_ids": [],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V06",
+      "V07",
+      "V08",
+      "V12",
+      "V14"
+    ],
+    "tn_ids": [
+      "K01",
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06",
+      "K07",
+      "K08",
+      "K09",
+      "K10"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "sonarqube",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 0,
+    "FP": 0,
+    "FN": 10,
+    "TN": 10,
+    "bonus_finds": 1204,
+    "tp_ids": [],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V03",
+      "V04",
+      "V05",
+      "V06",
+      "V07",
+      "V08",
+      "V12",
+      "V14"
+    ],
+    "tn_ids": [
+      "K01",
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06",
+      "K07",
+      "K08",
+      "K09",
+      "K10"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "zap",
+    "target": "vulnerable-shop",
+    "run": 1,
+    "TP": 3,
+    "FP": 0,
+    "FN": 10,
+    "TN": 1,
+    "bonus_finds": 229,
+    "tp_ids": [
+      "V03",
+      "V04",
+      "V15"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "zap",
+    "target": "vulnerable-shop",
+    "run": 2,
+    "TP": 3,
+    "FP": 0,
+    "FN": 10,
+    "TN": 1,
+    "bonus_finds": 229,
+    "tp_ids": [
+      "V03",
+      "V04",
+      "V15"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  },
+  {
+    "tool": "zap",
+    "target": "vulnerable-shop",
+    "run": 3,
+    "TP": 3,
+    "FP": 0,
+    "FN": 10,
+    "TN": 1,
+    "bonus_finds": 229,
+    "tp_ids": [
+      "V03",
+      "V04",
+      "V15"
+    ],
+    "fn_ids": [
+      "V01",
+      "V02",
+      "V05",
+      "V06",
+      "V09",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14"
+    ],
+    "tn_ids": [
+      "K07"
+    ],
+    "fp_details": []
+  }
+]

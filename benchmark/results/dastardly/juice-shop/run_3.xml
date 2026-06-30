@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<testsuites failures="1" name="Dastardly scan results - have a vulnerability-free day!" tests="133">
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Products/1?d=Fri%20Jun%2026%202026" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Challenges/?name=Score%20Board" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/user/whoami?fields=email" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/search?q=" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/redirect?to=https://github.com/juice-shop/juice-shop" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="1" name="http://host.docker.internal:3000/socket.io/?EIO=4&amp;transport=polling&amp;t=Py2vgQd&amp;sid=rCmKKbIKB19_W_uwAAdm" tests="1">
+        <testcase name="HTML does not specify charset">
+            <failure message="HTML does not specify charset found at http://host.docker.internal:3000/socket.io/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /socket.io/
+
+
+Issue Description
+If a  response states that it contains HTML content but does not specify a character set, then the browser may analyze the HTML and attempt to determine which character set it appears to be using. Even if the majority of the HTML actually employs a standard character set such as UTF-8, the presence of non-standard characters anywhere in the response may cause the browser to interpret the content using a different character set. This can have unexpected results, and can lead to cross-site scripting vulnerabilities in which non-standard encodings like UTF-7 can be used to bypass the application's defensive filters.
+
+In most cases, the absence of a charset directive does not constitute a security flaw, particularly if the response contains static content. You should review the contents of affected responses, and the context in which they appear, to determine whether any vulnerability exists. 
+
+
+Issue Remediation
+For every response containing HTML content, the application should include within the Content-type header a directive specifying a standard recognized character set, for example charset=ISO-8859-1.
+
+
+
+Evidence
+Request:
+POST /socket.io/?EIO=4&transport=polling&t=Py2vgQd&sid=rCmKKbIKB19_W_uwAAdm HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://host.docker.internal:3000
+Content-type: text/plain;charset=UTF-8
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Content-Length: 2
+
+40
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:4200
+Vary: Origin
+Content-Type: text/html
+Content-Length: 2
+Date: Fri, 26 Jun 2026 07:48:18 GMT
+Connection: close
+
+ok
+
+
+
+Vulnerability Classifications
+
+- CWE-16: Configuration (https://cwe.mitre.org/data/definitions/16.html)
+- CWE-436: Interpretation Conflict (https://cwe.mitre.org/data/definitions/436.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/socket.io/?EIO=4&amp;transport=polling&amp;t=Py2vgP7" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/nl-QVISKFUO.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Quantitys/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/it-SGJZRZTG.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/dk-JMBRHM34.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/30/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/54/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/42/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/3/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/1/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/th-WAHAQKQK.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Addresss" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ee-ESNNK5FI.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/eastere.gg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/admin/application-configuration" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/hk-KAABRID4.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/tn-NXUR5BRC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/coupons_2013.md.bak" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/quarantine/juicy_malware_macos_64.url" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/quarantine/juicy_malware_windows_64.exe.url" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/cz-PSDLWGGB.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/49/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/22/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Recycles/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/quarantine/juicy_malware_linux_arm_64.url" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/captcha/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ua-6L6MVDVK.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/pl-JSSZW3KY.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/se-3UJAVTP2.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ae-ICAMTCAR.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/id-JSWZPKEB.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Feedbacks/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/az-JZV3NJUP.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/us-J4WVK5FY.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/package.json.bak" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/cn-P7M3XOME.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ro-YBPUPSYC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/53/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/52/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/51/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/jp-I2KXFJBD.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/encrypt.pyc" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/mm-RDY24G3G.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/suspicious_errors.yml" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/fi-S5EH7BG6.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/quarantine" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/fr-6U4A3EWN.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ch-USJZZOGC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/bd-HMCXBQD3.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/lv-UD2OKAKZ.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ru-NVSR5C27.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/6/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/gr-YRG5TXUI.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/no-JTVUCTCT.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ie-QFERZM3U.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/de-UZ33VXB7.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/hu-C3DDGX7P.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/package-lock.json.bak" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/i18n/en.json" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/24/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/admin/application-version" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/25/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/bg-QKOWF4RG.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/gb-SC7363TA.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/tr-KC7PK4TT.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/quarantine/juicy_malware_linux_amd_64.url" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/il-HFTY4SM2.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/es-ct-LZMYMK2E.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/50/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/socket.io/?EIO=4&amp;transport=polling&amp;t=Py2vgRw&amp;sid=rCmKKbIKB19_W_uwAAdm" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/apple_pressings.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/JuiceShop_Logo.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/artwork2.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/hacking-instructor-TNP7OAEF.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/acquisitions.md" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/41/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-524KQQJQ.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/banana_juice.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/polyfills.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/languages" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-NUMHA4AJ.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/tw-OOSFQCFC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/recycle.component-75AMVYC4.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/fruit_press.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/material-icons-LEZCGFVT.woff2" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/basil_smoothie.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/font-mfizz-4UOGIENA.woff" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-ZO2KHBRB.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/carrot_juice.jpeg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/memories/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/berry_juice.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-GJJPXCX3.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/incident-support.kdbx" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/br-E7SKW6QV.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/legal.md" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/apple_juice.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/main.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/styles.css" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/announcement_encrypted.md" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/elderflower_cordial.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/robots.txt" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-JCQ5N7PA.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/green_smoothie.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/scripts.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ge-N4W5AZQT.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/dragonfruit_juice.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/eggfruit_juice.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/braga.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-7O3TTE7G.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-PX7UKXVL.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-7AKA75AX.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/kr-55V233NG.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/si-DPN2WQLH.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/grape_juice.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-UNFVUBM2.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-SCY7YOCS.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/permafrost.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/in-43GO2VKS.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/pt-M5ECPJDQ.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-GNBEOV4E.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/es-W6LDJAST.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-SI2GTEZM.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/about.component-DCTXVOS4.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+</testsuites>

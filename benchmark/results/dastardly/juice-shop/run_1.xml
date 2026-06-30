@@ -1,0 +1,4269 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<testsuites failures="46" name="Dastardly scan results - have a vulnerability-free day!" tests="154">
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Products/1?d=Fri%20Jun%2026%202026" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Challenges/?name=Score%20Board" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/user/whoami?fields=email" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/search?q=" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/redirect?to=https://github.com/juice-shop/juice-shop" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="1" name="http://host.docker.internal:3000/socket.io/?EIO=4&amp;transport=polling&amp;t=Py2qXsa&amp;sid=qriStjl7nRrgSjzLAAA6" tests="1">
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/socket.io/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /socket.io/
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+POST /socket.io/?EIO=4&transport=polling&t=Py2remD&sid=_1GaSfB9Ka12nfcwAAIE HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://host.docker.internal:3000
+Content-type: text/plain;charset=UTF-8
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Content-Length: 2
+
+40
+
+Response:
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Origin: http://localhost:4200
+Vary: Origin
+Content-Type: application/json
+Date: Fri, 26 Jun 2026 07:32:03 GMT
+Connection: close
+Content-Length: 41
+
+{"code":1,"message":"Session ID unknown"}
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="1" name="http://host.docker.internal:3000/socket.io/?EIO=4&amp;transport=polling&amp;t=Py2qwlO&amp;sid=ivNDHDX2riP9ZsbzAACm" tests="1">
+        <testcase name="HTML does not specify charset">
+            <failure message="HTML does not specify charset found at http://host.docker.internal:3000/socket.io/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /socket.io/
+
+
+Issue Description
+If a  response states that it contains HTML content but does not specify a character set, then the browser may analyze the HTML and attempt to determine which character set it appears to be using. Even if the majority of the HTML actually employs a standard character set such as UTF-8, the presence of non-standard characters anywhere in the response may cause the browser to interpret the content using a different character set. This can have unexpected results, and can lead to cross-site scripting vulnerabilities in which non-standard encodings like UTF-7 can be used to bypass the application's defensive filters.
+
+In most cases, the absence of a charset directive does not constitute a security flaw, particularly if the response contains static content. You should review the contents of affected responses, and the context in which they appear, to determine whether any vulnerability exists. 
+
+
+Issue Remediation
+For every response containing HTML content, the application should include within the Content-type header a directive specifying a standard recognized character set, for example charset=ISO-8859-1.
+
+
+
+Evidence
+Request:
+POST /socket.io/?EIO=4&transport=polling&t=Py2qwlO&sid=ivNDHDX2riP9ZsbzAACm HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://host.docker.internal:3000
+Content-type: text/plain;charset=UTF-8
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Content-Length: 2
+
+40
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:4200
+Vary: Origin
+Content-Type: text/html
+Content-Length: 2
+Date: Fri, 26 Jun 2026 07:27:34 GMT
+Connection: close
+
+ok
+
+
+
+Vulnerability Classifications
+
+- CWE-16: Configuration (https://cwe.mitre.org/data/definitions/16.html)
+- CWE-436: Interpretation Conflict (https://cwe.mitre.org/data/definitions/436.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/socket.io/?EIO=4&amp;transport=polling&amp;t=Py2qwjk" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/il-HFTY4SM2.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/il-HFTY4SM2.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/il-HFTY4SM2.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://wxhxerrqbsux.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/il-HFTY4SM2.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://wxhxerrqbsux.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"386-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 902
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:40 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-il" viewBox="0 0 640 480">
+<defs>
+<clipPath id="il-a">
+<path fill-opacity=".7" d="M-87.6 0H595v512H-87.6z"/>
+</clipPath>
+</defsSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/il-HFTY4SM2.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/il-HFTY4SM2.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/il-HFTY4SM2.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"386-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 902
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:40 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-il" viewBox="0 0 640 480">
+<defs>
+<clipPath id="il-a">
+<path fill-opacity=".7" d="M-87.6 0H595v512H-87.6z"/>
+</clipPath>
+</defsSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Quantitys/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/package-lock.json.bak" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ae-ICAMTCAR.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/package.json.bak" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/assets/i18n/en.json" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/assets/i18n/en.json" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /assets/i18n/en.json
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://rnnnwehpyzag.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /assets/i18n/en.json HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://rnnnwehpyzag.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 11:59:39 GMT
+ETag: W/"8a90-19e1c0e97f8"
+Content-Type: application/json; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:30:48 GMT
+Connection: close
+Content-Length: 35472
+
+{
+"LANGUAGE": "English",
+"NAV_SEARCH": "Search",
+"SEARCH_PLACEHOLDER": "Search...",
+"NAV_COMPLAIN": "Complaint",
+"TITLE_LOGIN": "Login",
+"MANDATORY_EMAIL": "Please provide an email addressSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/assets/i18n/en.json" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /assets/i18n/en.json
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /assets/i18n/en.json HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 11:59:39 GMT
+ETag: W/"8a90-19e1c0e97f8"
+Content-Type: application/json; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:30:48 GMT
+Connection: close
+Content-Length: 35472
+
+{
+"LANGUAGE": "English",
+"NAV_SEARCH": "Search",
+"SEARCH_PLACEHOLDER": "Search...",
+"NAV_COMPLAIN": "Complaint",
+"TITLE_LOGIN": "Login",
+"MANDATORY_EMAIL": "Please provide an email addressSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/ftp/" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/ftp/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /ftp/
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://cqsyvqqecjsv.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /ftp/ HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://cqsyvqqecjsv.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: text/html; charset=utf-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:22 GMT
+Connection: close
+Content-Length: 11274
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>listing directoSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/ftp/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /ftp/
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /ftp/ HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: text/html; charset=utf-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:29:16 GMT
+Connection: close
+Content-Length: 11274
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>listing directoSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/cn-P7M3XOME.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/cn-P7M3XOME.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/cn-P7M3XOME.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://lyuvgjolwxlf.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/cn-P7M3XOME.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://lyuvgjolwxlf.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"32d-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 813
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:40 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="flag-icons-cn" viewBox="0 0 640 480">
+<defs>
+<path id="cn-a" fill="#ff0" d="M-.6.8 0-1 .6.8-1-.3h2z"/>
+</Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/cn-P7M3XOME.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/cn-P7M3XOME.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/cn-P7M3XOME.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"32d-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 813
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:40 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="flag-icons-cn" viewBox="0 0 640 480">
+<defs>
+<path id="cn-a" fill="#ff0" d="M-.6.8 0-1 .6.8-1-.3h2z"/>
+</Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/se-3UJAVTP2.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/jp-I2KXFJBD.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/pl-JSSZW3KY.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/mm-RDY24G3G.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/encrypt.pyc" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/de-UZ33VXB7.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/de-UZ33VXB7.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/de-UZ33VXB7.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://cbqkcqyskfni.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/de-UZ33VXB7.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://cbqkcqyskfni.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"d2-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 210
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-de" viewBox="0 0 640 480">
+<path fill="#ffce00" d="M0 320h640v160H0z"/>
+<path d="M0 0h640v160H0z"/>
+<path fill="#d00" d="M0 160h640v160H0z"Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/de-UZ33VXB7.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/de-UZ33VXB7.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/de-UZ33VXB7.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"d2-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 210
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-de" viewBox="0 0 640 480">
+<path fill="#ffce00" d="M0 320h640v160H0z"/>
+<path d="M0 0h640v160H0z"/>
+<path fill="#d00" d="M0 160h640v160H0z"Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ua-6L6MVDVK.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/50/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/captcha/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/hk-KAABRID4.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/nl-QVISKFUO.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/52/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/53/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/th-WAHAQKQK.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/suspicious_errors.yml" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/es-ct-LZMYMK2E.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/es-ct-LZMYMK2E.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/es-ct-LZMYMK2E.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://vhkhqhsrngti.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/es-ct-LZMYMK2E.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://vhkhqhsrngti.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"ff-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 255
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-es-ct" viewBox="0 0 640 480">
+<path fill="#fcdd09" d="M0 0h640v480H0z"/>
+<path stroke="#da121a" stroke-width="60" d="M0 90h810m0 120H0m0 120hSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/es-ct-LZMYMK2E.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/es-ct-LZMYMK2E.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/es-ct-LZMYMK2E.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"ff-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 255
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-es-ct" viewBox="0 0 640 480">
+<path fill="#fcdd09" d="M0 0h640v480H0z"/>
+<path stroke="#da121a" stroke-width="60" d="M0 90h810m0 120H0m0 120hSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/fi-S5EH7BG6.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/fi-S5EH7BG6.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/fi-S5EH7BG6.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://chjasqbjmhdi.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/fi-S5EH7BG6.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://chjasqbjmhdi.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"ea-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 234
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-fi" viewBox="0 0 640 480">
+<path fill="#fff" d="M0 0h640v480H0z"/>
+<path fill="#002f6c" d="M0 174.5h640v131H0z"/>
+<path fill="#002f6c" d="MSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/fi-S5EH7BG6.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/fi-S5EH7BG6.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/fi-S5EH7BG6.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"ea-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 234
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-fi" viewBox="0 0 640 480">
+<path fill="#fff" d="M0 0h640v480H0z"/>
+<path fill="#002f6c" d="M0 174.5h640v131H0z"/>
+<path fill="#002f6c" d="MSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/cz-PSDLWGGB.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/cz-PSDLWGGB.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/cz-PSDLWGGB.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://plmkpydikepk.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/cz-PSDLWGGB.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://plmkpydikepk.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"e1-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 225
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-cz" viewBox="0 0 640 480">
+<path fill="#fff" d="M0 0h640v240H0z"/>
+<path fill="#d7141a" d="M0 240h640v240H0z"/>
+<path fill="#11457e" d="M36Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/cz-PSDLWGGB.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/cz-PSDLWGGB.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/cz-PSDLWGGB.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"e1-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 225
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-cz" viewBox="0 0 640 480">
+<path fill="#fff" d="M0 0h640v240H0z"/>
+<path fill="#d7141a" d="M0 240h640v240H0z"/>
+<path fill="#11457e" d="M36Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/rest/admin/application-version" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/rest/admin/application-version" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /rest/admin/application-version
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://gqdbzlcmcnhz.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /rest/admin/application-version HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://gqdbzlcmcnhz.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: application/json; charset=utf-8
+Content-Length: 20
+ETag: W/"14-+EBpZnfu193JzIOBjXsY1+KveN8"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:51 GMT
+Connection: close
+
+{"version":"20.0.0"}
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/rest/admin/application-version" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /rest/admin/application-version
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /rest/admin/application-version HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: application/json; charset=utf-8
+Content-Length: 20
+ETag: W/"14-+EBpZnfu193JzIOBjXsY1+KveN8"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:51 GMT
+Connection: close
+
+{"version":"20.0.0"}
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/30/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/hu-C3DDGX7P.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/1/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ch-USJZZOGC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/dk-JMBRHM34.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/dk-JMBRHM34.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/dk-JMBRHM34.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://qnvcxexfpaub.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/dk-JMBRHM34.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://qnvcxexfpaub.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"ec-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 236
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:33:50 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-dk" viewBox="0 0 640 480">
+<path fill="#c8102e" d="M0 0h640.1v480H0z"/>
+<path fill="#fff" d="M205.7 0h68.6v480h-68.6z"/>
+<path fill="#fff" Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/dk-JMBRHM34.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/dk-JMBRHM34.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/dk-JMBRHM34.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"ec-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 236
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:33:50 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-dk" viewBox="0 0 640 480">
+<path fill="#c8102e" d="M0 0h640.1v480H0z"/>
+<path fill="#fff" d="M205.7 0h68.6v480h-68.6z"/>
+<path fill="#fff" Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/az-JZV3NJUP.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/22/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/ee-ESNNK5FI.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/ee-ESNNK5FI.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/ee-ESNNK5FI.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://ezlqunkfnwkn.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/ee-ESNNK5FI.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://ezlqunkfnwkn.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"13e-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 318
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-ee" viewBox="0 0 640 480">
+<g fill-rule="evenodd" stroke-width="1pt">
+<rect width="640" height="477.9" rx="0" ry="0"/>
+<rect width="640Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/ee-ESNNK5FI.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/ee-ESNNK5FI.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/ee-ESNNK5FI.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"13e-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 318
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-ee" viewBox="0 0 640 480">
+<g fill-rule="evenodd" stroke-width="1pt">
+<rect width="640" height="477.9" rx="0" ry="0"/>
+<rect width="640Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/24/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/25/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/us-J4WVK5FY.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/quarantine" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ru-NVSR5C27.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/coupons_2013.md.bak" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/id-JSWZPKEB.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/tn-NXUR5BRC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/eastere.gg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/no-JTVUCTCT.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Recycles/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ro-YBPUPSYC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/lv-UD2OKAKZ.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/it-SGJZRZTG.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/admin/application-configuration" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/gb-SC7363TA.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/api/Feedbacks/" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/api/Feedbacks/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /api/Feedbacks/
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://wbbfjhgifwvw.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /api/Feedbacks/ HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://wbbfjhgifwvw.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: application/json; charset=utf-8
+ETag: W/"6c6-RI+KeT/lLDoEgmCZo/FzJleO66w"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:09 GMT
+Connection: close
+Content-Length: 1734
+
+{"status":"success","data":[{"UserId":1,"id":1,"comment":"I love this shop! Best products in town! Highly recommended! (***in@juice-sh.op)","rating":5,"createdAt":"2026-06-26T06:54:16.672Z","updatedAtSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/api/Feedbacks/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /api/Feedbacks/
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /api/Feedbacks/ HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: application/json; charset=utf-8
+ETag: W/"6c6-RI+KeT/lLDoEgmCZo/FzJleO66w"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+Content-Length: 1734
+
+{"status":"success","data":[{"UserId":1,"id":1,"comment":"I love this shop! Best products in town! Highly recommended! (***in@juice-sh.op)","rating":5,"createdAt":"2026-06-26T06:54:16.672Z","updatedAtSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/51/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://elktpqcostib.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET / HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://elktpqcostib.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Fri, 26 Jun 2026 06:54:21 GMT
+ETag: W/"26af-19f02b54455"
+Content-Type: text/html; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:54 GMT
+Connection: close
+Content-Length: 9903
+
+<!--
+~ Copyright (c) 2014-2026 Bjoern Kimminich & the OWASP Juice Shop contributors.
+~ SPDX-License-Identifier: MIT
+-->
+
+<!doctype html>
+<html lang="en" data-beasties-container>
+<head>
+<meta cSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET / HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Fri, 26 Jun 2026 06:54:21 GMT
+ETag: W/"26af-19f02b54455"
+Content-Type: text/html; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:29:43 GMT
+Connection: close
+Content-Length: 9903
+
+<!--
+~ Copyright (c) 2014-2026 Bjoern Kimminich & the OWASP Juice Shop contributors.
+~ SPDX-License-Identifier: MIT
+-->
+
+<!doctype html>
+<html lang="en" data-beasties-container>
+<head>
+<meta cSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/54/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/tr-KC7PK4TT.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/bg-QKOWF4RG.svg" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/bg-QKOWF4RG.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/bg-QKOWF4RG.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://gixbxbkevflm.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/bg-QKOWF4RG.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://gixbxbkevflm.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"11b-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 283
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-bg" viewBox="0 0 640 480">
+<g fill-rule="evenodd" stroke-width="1pt">
+<path fill="#d62612" d="M0 320h640v160H0z"/>
+<path fill="#fff" d=Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/bg-QKOWF4RG.svg" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/bg-QKOWF4RG.svg
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/bg-QKOWF4RG.svg HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"11b-19e1c10f958"
+Content-Type: image/svg+xml
+Content-Length: 283
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-bg" viewBox="0 0 640 480">
+<g fill-rule="evenodd" stroke-width="1pt">
+<path fill="#d62612" d="M0 320h640v160H0z"/>
+<path fill="#fff" d=Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/42/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ie-QFERZM3U.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/fr-6U4A3EWN.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/gr-YRG5TXUI.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/bd-HMCXBQD3.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/rest/continue-code" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/rest/continue-code" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /rest/continue-code
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://qfmlodybpubc.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /rest/continue-code HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://qfmlodybpubc.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: application/json; charset=utf-8
+Content-Length: 79
+ETag: W/"4f-uLu5Lde8X4OncOnJeidFijss6vg"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+
+{"continueCode":"y1OzBZxNpnLrM5WmgEKv8XakQ7DA6LcQGJ6yOlV9Pow1jYqbz2eRB34oE5mM"}
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/rest/continue-code" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /rest/continue-code
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /rest/continue-code HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: application/json, text/plain, */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: application/json; charset=utf-8
+Content-Length: 79
+ETag: W/"4f-uLu5Lde8X4OncOnJeidFijss6vg"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+
+{"continueCode":"y1OzBZxNpnLrM5WmgEKv8XakQ7DA6LcQGJ6yOlV9Pow1jYqbz2eRB34oE5mM"}
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/3/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/49/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/api/Addresss" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/6/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/socket.io/?EIO=4&amp;transport=polling&amp;t=Py2qwmM&amp;sid=ivNDHDX2riP9ZsbzAACm" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/assets/public/images/JuiceShop_Logo.png" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/assets/public/images/JuiceShop_Logo.png" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /assets/public/images/JuiceShop_Logo.png
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://zyyegsqqiioa.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /assets/public/images/JuiceShop_Logo.png HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://zyyegsqqiioa.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 11:59:39 GMT
+ETag: W/"2255e-19e1c0e97f8"
+Content-Type: image/png
+Content-Length: 140638
+Date: Fri, 26 Jun 2026 07:31:51 GMT
+Connection: close
+
+�PNG
+]]>&#26;
+&#0;&#0;&#0;<![CDATA[IHDR]]>&#0;&#0;&#8;<![CDATA[�]]>&#0;&#0;<![CDATA[	�]]>&#8;&#6;&#0;&#0;&#0;<![CDATA[Z��y]]>&#0;&#2;<![CDATA[%%IDATx���m���y'�^O����]]>&#23;<![CDATA[�A]]>&#18;<![CDATA[H]]>&#2;<![CDATA[	$d�ݍ���"ٞ��I ;v�=�%Ϥ[�ن6�{���a������	8�]]>&#18;<![CDATA[�!b�T<�2]]>&#31;<![CDATA[`BN8]]>&#31;<![CDATA[N�DEuj�v�t*�b�dh�6h۱ݲ�@B굯�]]>&#22;&#14;<![CDATA[`^��^��z��Wu���{>d�A<^��.]]>&#2;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;<![CDATA[�`
+7]]>&#0;&#0;<![CDATA[Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/assets/public/images/JuiceShop_Logo.png" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /assets/public/images/JuiceShop_Logo.png
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /assets/public/images/JuiceShop_Logo.png HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 11:59:39 GMT
+ETag: W/"2255e-19e1c0e97f8"
+Content-Type: image/png
+Content-Length: 140638
+Date: Fri, 26 Jun 2026 07:31:51 GMT
+Connection: close
+
+�PNG
+]]>&#26;
+&#0;&#0;&#0;<![CDATA[IHDR]]>&#0;&#0;&#8;<![CDATA[�]]>&#0;&#0;<![CDATA[	�]]>&#8;&#6;&#0;&#0;&#0;<![CDATA[Z��y]]>&#0;&#2;<![CDATA[%%IDATx���m���y'�^O����]]>&#23;<![CDATA[�A]]>&#18;<![CDATA[H]]>&#2;<![CDATA[	$d�ݍ���"ٞ��I ;v�=�%Ϥ[�ن6�{���a������	8�]]>&#18;<![CDATA[�!b�T<�2]]>&#31;<![CDATA[`BN8]]>&#31;<![CDATA[N�DEuj�v�t*�b�dh�6h۱ݲ�@B굯�]]>&#22;&#14;<![CDATA[`^��^��z��Wu���{>d�A<^��.]]>&#2;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;<![CDATA[�`
+7]]>&#0;&#0;<![CDATA[Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/hacking-instructor-TNP7OAEF.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-UNFVUBM2.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/languages" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/apple_pressings.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/chunk-SI2GTEZM.js" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/chunk-SI2GTEZM.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /chunk-SI2GTEZM.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://dtjqplolvxdl.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /chunk-SI2GTEZM.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://dtjqplolvxdl.com
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"223-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Content-Length: 547
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+
+import{C as i,Ec as s,Y as o,ba as n,dd as a,q as e}from"./chunk-GJJPXCX3.js";var v=(()=>{class t{http=n(a);hostServer=s.hostServer;host=this.hostServer+"/rest/admin";configObservable;getApplicationCoSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/chunk-SI2GTEZM.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /chunk-SI2GTEZM.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /chunk-SI2GTEZM.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://host.docker.internal:3000
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"223-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Content-Length: 547
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:54 GMT
+Connection: close
+
+import{C as i,Ec as s,Y as o,ba as n,dd as a,q as e}from"./chunk-GJJPXCX3.js";var v=(()=>{class t{http=n(a);hostServer=s.hostServer;host=this.hostServer+"/rest/admin";configObservable;getApplicationCoSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-SCY7YOCS.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/chunk-524KQQJQ.js" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/chunk-524KQQJQ.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /chunk-524KQQJQ.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://zzaespettygk.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /chunk-524KQQJQ.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://zzaespettygk.com
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"23f47-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+Content-Length: 147271
+
+import{A as _i,o as mi,p as ui,t as pi}from"./chunk-7AKA75AX.js";import{$ as b,$d as ci,A as $,B as ve,Bb as V,Bc as ti,Cb as ze,Cc as ii,Db as L,Eb as Gt,Fa as _,Fb as de,Gb as w,Ha as J,Hb as C,Hd aSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/chunk-524KQQJQ.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /chunk-524KQQJQ.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /chunk-524KQQJQ.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://host.docker.internal:3000
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"23f47-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:54 GMT
+Connection: close
+Content-Length: 147271
+
+import{A as _i,o as mi,p as ui,t as pi}from"./chunk-7AKA75AX.js";import{$ as b,$d as ci,A as $,B as ve,Bb as V,Bc as ti,Cb as ze,Cc as ii,Db as L,Eb as Gt,Fa as _,Fb as de,Gb as w,Ha as J,Hb as C,Hd aSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/chunk-PX7UKXVL.js" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/chunk-PX7UKXVL.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /chunk-PX7UKXVL.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://jwdskxluwmfj.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /chunk-PX7UKXVL.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://jwdskxluwmfj.com
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"3b0-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Content-Length: 944
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:32:05 GMT
+Connection: close
+
+var o=class extends Error{};o.prototype.name="InvalidTokenError";function i(t){return decodeURIComponent(atob(t).replace(/(.)/g,(e,r)=>{let n=r.charCodeAt(0).toString(16).toUpperCase();return n.lengthSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/chunk-PX7UKXVL.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /chunk-PX7UKXVL.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /chunk-PX7UKXVL.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://host.docker.internal:3000
+Referer: http://host.docker.internal:3000/
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"3b0-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Content-Length: 944
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:31:54 GMT
+Connection: close
+
+var o=class extends Error{};o.prototype.name="InvalidTokenError";function i(t){return decodeURIComponent(atob(t).replace(/(.)/g,(e,r)=>{let n=r.charCodeAt(0).toString(16).toUpperCase();return n.lengthSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/grape_juice.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/pt-M5ECPJDQ.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/legal.md" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/artwork2.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/green_smoothie.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/about.component-DCTXVOS4.js" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/about.component-DCTXVOS4.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /about.component-DCTXVOS4.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://qibiqhlesxnd.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /about.component-DCTXVOS4.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Origin: http://qibiqhlesxnd.com
+Referer: http://host.docker.internal:3000/main.js
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"15b7a-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:25 GMT
+Connection: close
+Content-Length: 88954
+
+import{b as Ut,f as jt,g as $t,h as qt,j as Wt,k as Yt}from"./chunk-SCY7YOCS.js";import{C as Gt,N as Nt,a as Tt,e as Ht,ma as Lt,na as Bt}from"./chunk-UNFVUBM2.js";import{a as Ot}from"./chunk-SI2GTEZMSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/about.component-DCTXVOS4.js" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /about.component-DCTXVOS4.js
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /about.component-DCTXVOS4.js HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Origin: http://host.docker.internal:3000
+Referer: http://host.docker.internal:3000/main.js
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"15b7a-19e1c10f958"
+Content-Type: application/javascript; charset=UTF-8
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:34:20 GMT
+Connection: close
+Content-Length: 88954
+
+import{b as Ut,f as jt,g as $t,h as qt,j as Wt,k as Yt}from"./chunk-SCY7YOCS.js";import{C as Gt,N as Nt,a as Tt,e as Ht,ma as Lt,na as Bt}from"./chunk-UNFVUBM2.js";import{a as Ot}from"./chunk-SI2GTEZMSnip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/media/font-mfizz-4UOGIENA.woff" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/media/font-mfizz-4UOGIENA.woff" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/font-mfizz-4UOGIENA.woff
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://jfqprriazead.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /media/font-mfizz-4UOGIENA.woff HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Origin: http://jfqprriazead.com
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"9fc8-19e1c10f958"
+Content-Type: font/woff
+Content-Length: 40904
+Date: Fri, 26 Jun 2026 07:33:50 GMT
+Connection: close
+
+wOFF]]>&#0;&#1;&#0;&#0;&#0;&#0;<![CDATA[��]]>&#0;<![CDATA[]]>&#0;&#0;&#0;&#0;<![CDATA[�`]]>&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;<![CDATA[FFTM]]>&#0;&#0;<![CDATA[��]]>&#0;&#0;&#0;&#26;&#0;&#0;&#0;&#28;<![CDATA[u�crOS/2]]>&#0;&#0;&#1;<![CDATA[�]]>&#0;&#0;&#0;<![CDATA[J]]>&#0;&#0;&#0;<![CDATA[`Q'^�cmap]]>&#0;&#0;&#2;<![CDATA[`]]>&#0;&#0;&#0;<![CDATA[J]]>&#0;&#0;&#1;<![CDATA[J�|]]>&#21;<![CDATA[�cvt ]]>&#0;&#0;&#2;<![CDATA[�]]>&#0;&#0;&#0;&#4;&#0;&#0;&#0;&#4;&#0;&#17;&#1;<![CDATA[Dgasp]]>&#0;&#0;<![CDATA[��]]>&#0;&#0;&#0;&#8;&#0;&#0;&#0;&#8;<![CDATA[��]]>&#0;&#3;<![CDATA[glyf]]>&#0;&#0;&#3;<![CDATA[�]]>&#0;&#0;<![CDATA[��]]>&#0;&#0;<![CDATA[��]]>&#0;<![CDATA[���head]]>&#0;&#0;&#1;<![CDATA[0]]>&#0;&#0;&#0;<![CDATA[0]]>&#0;&#0;&#0;<![CDATA[6]]>&#8;<![CDATA[v]]>&#0;<![CDATA[Uhhea]]>&#0;&#0;&#1;<![CDATA[`]]>&#0;&#0;&#0;<![CDATA[ ]]>&#0;&#0;&#0;<![CDATA[$Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/media/font-mfizz-4UOGIENA.woff" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /media/font-mfizz-4UOGIENA.woff
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /media/font-mfizz-4UOGIENA.woff HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: language=en
+Origin: http://host.docker.internal:3000
+Referer: http://host.docker.internal:3000/styles.css
+Sec-CH-UA: "Google Chrome";v="134", "Not=A?Brand";v="8", "Chromium";v="134"
+Sec-CH-UA-Platform: "Linux"
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Accept-Ranges: bytes
+Cache-Control: public, max-age=0
+Last-Modified: Tue, 12 May 2026 12:02:15 GMT
+ETag: W/"9fc8-19e1c10f958"
+Content-Type: font/woff
+Content-Length: 40904
+Date: Fri, 26 Jun 2026 07:33:18 GMT
+Connection: close
+
+wOFF]]>&#0;&#1;&#0;&#0;&#0;&#0;<![CDATA[��]]>&#0;<![CDATA[]]>&#0;&#0;&#0;&#0;<![CDATA[�`]]>&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;&#0;<![CDATA[FFTM]]>&#0;&#0;<![CDATA[��]]>&#0;&#0;&#0;&#26;&#0;&#0;&#0;&#28;<![CDATA[u�crOS/2]]>&#0;&#0;&#1;<![CDATA[�]]>&#0;&#0;&#0;<![CDATA[J]]>&#0;&#0;&#0;<![CDATA[`Q'^�cmap]]>&#0;&#0;&#2;<![CDATA[`]]>&#0;&#0;&#0;<![CDATA[J]]>&#0;&#0;&#1;<![CDATA[J�|]]>&#21;<![CDATA[�cvt ]]>&#0;&#0;&#2;<![CDATA[�]]>&#0;&#0;&#0;&#4;&#0;&#0;&#0;&#4;&#0;&#17;&#1;<![CDATA[Dgasp]]>&#0;&#0;<![CDATA[��]]>&#0;&#0;&#0;&#8;&#0;&#0;&#0;&#8;<![CDATA[��]]>&#0;&#3;<![CDATA[glyf]]>&#0;&#0;&#3;<![CDATA[�]]>&#0;&#0;<![CDATA[��]]>&#0;&#0;<![CDATA[��]]>&#0;<![CDATA[���head]]>&#0;&#0;&#1;<![CDATA[0]]>&#0;&#0;&#0;<![CDATA[0]]>&#0;&#0;&#0;<![CDATA[6]]>&#8;<![CDATA[v]]>&#0;<![CDATA[Uhhea]]>&#0;&#0;&#1;<![CDATA[`]]>&#0;&#0;&#0;<![CDATA[ ]]>&#0;&#0;&#0;<![CDATA[$Snip
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/dragonfruit_juice.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="2" name="http://host.docker.internal:3000/robots.txt" tests="2">
+        <testcase name="Cross-origin resource sharing - arbitrary origin trusted">
+            <failure message="Cross-origin resource sharing: arbitrary origin trusted found at http://host.docker.internal:3000/robots.txt" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /robots.txt
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.
+
+The application allowed access from the requested origin http://buqwyxjokyca.com
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.
+
+If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.
+
+
+Issue Remediation
+Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.
+
+
+Evidence
+Request:
+GET /robots.txt HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://buqwyxjokyca.com
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: text/plain; charset=utf-8
+Content-Length: 28
+ETag: W/"1c-8HgF6mNyhsSFK0pascC9uB0wjX0"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:27:42 GMT
+Connection: close
+
+User-agent: *
+Disallow: /ftp
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+        <testcase name="Cross-origin resource sharing">
+            <failure message="Cross-origin resource sharing found at http://host.docker.internal:3000/robots.txt" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://host.docker.internal:3000
+
+Path: /robots.txt
+
+
+Issue Detail
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+
+If the application relies on network firewalls or other IP-based access controls, this policy is likely to present a security risk.
+
+Since the Vary: Origin header was not present in the response, reverse proxies and intermediate servers may cache it. This may enable an attacker to carry out cache poisoning attacks.
+
+Issue Background
+An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.
+If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.
+
+Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.
+
+
+Issue Remediation
+Any inappropriate domains should be removed from the CORS policy.
+
+
+Evidence
+Request:
+GET /robots.txt HTTP/1.1
+Host: host.docker.internal:3000
+Accept-Encoding: gzip, deflate, br
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Origin: http://host.docker.internal:3000
+
+
+
+Response:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Feature-Policy: payment 'self'
+X-Recruiting: /#/jobs
+Content-Type: text/plain; charset=utf-8
+Content-Length: 28
+ETag: W/"1c-8HgF6mNyhsSFK0pascC9uB0wjX0"
+Vary: Accept-Encoding
+Date: Fri, 26 Jun 2026 07:27:42 GMT
+Connection: close
+
+User-agent: *
+Disallow: /ftp
+
+
+
+References
+
+- Web Security Academy: Cross-origin resource sharing (CORS) (https://portswigger.net/web-security/cors)
+- Exploiting CORS Misconfigurations (https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+
+
+Vulnerability Classifications
+
+- CWE-942: Overly Permissive Cross-domain Whitelist (https://cwe.mitre.org/data/definitions/942.html)
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-7O3TTE7G.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/si-DPN2WQLH.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/carrot_juice.jpeg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/products/41/reviews" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/in-43GO2VKS.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/basil_smoothie.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/incident-support.kdbx" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/apple_juice.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/polyfills.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/recycle.component-75AMVYC4.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-GNBEOV4E.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/elderflower_cordial.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/permafrost.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/confetti-22GFNPW3.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/banana_juice.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/fruit_press.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/announcement_encrypted.md" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/main.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-7AKA75AX.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/material-icons-LEZCGFVT.woff2" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/es-W6LDJAST.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/styles.css" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-JCQ5N7PA.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/rest/memories/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/berry_juice.png" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/ge-N4W5AZQT.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/kr-55V233NG.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/eggfruit_juice.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/tw-OOSFQCFC.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/ftp/acquisitions.md" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/media/br-E7SKW6QV.svg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/assets/public/images/products/braga.jpg" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/scripts.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-ZO2KHBRB.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-GJJPXCX3.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://host.docker.internal:3000/chunk-NUMHA4AJ.js" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+</testsuites>

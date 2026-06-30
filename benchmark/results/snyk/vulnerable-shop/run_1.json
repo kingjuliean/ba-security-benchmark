@@ -1,32 +1,4 @@
-﻿Unable to find image 'snyk/snyk:node-18' locally
-node-18: Pulling from snyk/snyk
-37927ed901b1: Pulling fs layer
-e23f099911d6: Pulling fs layer
-c6b30c3f1696: Pulling fs layer
-f7021de04417: Pulling fs layer
-cda7f44f2bdd: Pulling fs layer
-09a339f28c22: Pulling fs layer
-3e6b9d1a9511: Pulling fs layer
-043af1d61a13: Pulling fs layer
-5474705c84a8: Pulling fs layer
-461077a72fb7: Pulling fs layer
-3697be50c98b: Pulling fs layer
-79b2f47ad444: Pulling fs layer
-461077a72fb7: Download complete
-cda7f44f2bdd: Download complete
-043af1d61a13: Download complete
-f7021de04417: Download complete
-3697be50c98b: Download complete
-09a339f28c22: Download complete
-5474705c84a8: Download complete
-37927ed901b1: Download complete
-c6b30c3f1696: Download complete
-3e6b9d1a9511: Download complete
-79b2f47ad444: Download complete
-e23f099911d6: Download complete
-Digest: sha256:1dcba54d28484f8cdfb7a2367791a26a4c4ad7a509b069732f3c93201fb23c30
-Status: Downloaded newer image for snyk/snyk:node-18
-{
+﻿{
   "vulnerabilities": [
     {
       "id": "SNYK-JS-AXIOS-1038255",
@@ -178,7 +150,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-12613773",
@@ -307,7 +281,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-15252993",
@@ -447,7 +423,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-1579269",
@@ -506,7 +484,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-15T14:58:33.797320Z"
+          "modificationTime": "2026-06-24T14:04:20.330482Z"
         },
         {
           "type": "secondary",
@@ -529,8 +507,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       ],
       "description": "## Overview\n[axios](https://www.npmjs.com/package/axios) is a promise-based HTTP client for the browser and Node.js.\n\nAffected versions of this package are vulnerable to Regular Expression Denial of Service (ReDoS) via the `trim` function.\r\n\r\n## PoC\r\n```\r\n// poc.js\r\n\r\nvar {trim} = require(\"axios/lib/utils\");\r\n\r\nfunction build_blank (n) {\r\nvar ret = \"1\"\r\nfor (var i = 0; i < n; i++) {\r\nret += \" \"\r\n}\r\n\r\nreturn ret + \"1\";\r\n}\r\n\r\nvar time = Date.now();\r\ntrim(build_blank(50000))\r\nvar time_cost = Date.now() - time;\r\nconsole.log(\"time_cost: \" + time_cost)\r\n```\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its original and legitimate users. There are many types of DoS attacks, ranging from trying to clog the network pipes to the system by generating a large volume of traffic from many machines (a Distributed Denial of Service - DDoS - attack) to sending crafted requests that cause a system to crash or take a disproportional amount of time to process.\n\nThe Regular expression Denial of Service (ReDoS) is a type of Denial of Service attack. Regular expressions are incredibly powerful, but they aren't very intuitive and can ultimately end up making it easy for attackers to take your site down.\n\nLetÔÇÖs take the following regular expression as an example:\n```js\nregex = /A(B|C+)+D/\n```\n\nThis regular expression accomplishes the following:\n- `A` The string must start with the letter 'A'\n- `(B|C+)+` The string must then follow the letter A with either the letter 'B' or some number of occurrences of the letter 'C' (the `+` matches one or more times). The `+` at the end of this section states that we can look for one or more matches of this section.\n- `D` Finally, we ensure this section of the string ends with a 'D'\n\nThe expression would match inputs such as `ABBD`, `ABCCCCD`, `ABCBCCCD` and `ACCCCCD`\n\nIt most cases, it doesn't take very long for a regex engine to find a match:\n\n```bash\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCD\")'\n0.04s user 0.01s system 95% cpu 0.052 total\n\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCX\")'\n1.79s user 0.02s system 99% cpu 1.812 total\n```\n\nThe entire process of testing it against a 30 characters long string takes around ~52ms. But when given an invalid string, it takes nearly two seconds to complete the test, over ten times as long as it took to test a valid string. The dramatic difference is due to the way regular expressions get evaluated.\n\nMost Regex engines will work very similarly (with minor differences). The engine will match the first possible way to accept the current character and proceed to the next one. If it then fails to match the next one, it will backtrack and see if there was another way to digest the previous character. If it goes too far down the rabbit hole only to find out the string doesnÔÇÖt match in the end, and if many characters have multiple valid regex paths, the number of backtracking steps can become very large, resulting in what is known as _catastrophic backtracking_.\n\nLet's look at how our expression runs into this problem, using a shorter string: \"ACCCX\". While it seems fairly straightforward, there are still four different ways that the engine could match those three C's:\n1. CCC\n2. CC+C\n3. C+CC\n4. C+C+C.\n\nThe engine has to try each of those combinations to see if any of them potentially match against the expression. When you combine that with the other steps the engine must take, we can use [RegEx 101 debugger](https://regex101.com/debugger) to see the engine has to take a total of 38 steps before it can determine the string doesn't match.\n\nFrom there, the number of steps the engine must use to validate a string just continues to grow.\n\n| String | Number of C's | Number of steps |\n| -------|-------------:| -----:|\n| ACCCX | 3 | 38\n| ACCCCX | 4 | 71\n| ACCCCCX | 5 | 136\n| ACCCCCCCCCCCCCCX | 14 | 65,553\n\n\nBy the time the string includes 14 C's, the engine has to take over 65,000 steps just to see if the string is valid. These extreme situations can cause them to work very slowly (exponentially related to input size, as shown above), allowing an attacker to exploit this and can cause the service to excessively consume CPU, resulting in a Denial of Service.\n\n## Remediation\nUpgrade `axios` to version 0.21.3 or higher.\n## References\n- [GitHub Commit](https://github.com/axios/axios/commit/5b457116e31db0e88fede6c428e969e87f290929)\n",
       "epssDetails": {
-        "percentile": "0.93964",
-        "probability": "0.07931",
+        "percentile": "0.94343",
+        "probability": "0.08515",
         "modelVersion": "v2026.06.15"
       },
       "identifiers": {
@@ -567,7 +545,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2021-09-01T16:08:42.935317Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-15T14:58:33.797320Z",
+      "modificationTime": "2026-06-24T14:04:20.330482Z",
       "socialTrendAlert": false,
       "severityWithCritical": "high",
       "from": [
@@ -581,7 +559,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-15965856",
@@ -737,7 +717,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-15969258",
@@ -899,7 +881,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16298055",
@@ -944,7 +928,15 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "title": "Maintainer's Advisory"
         }
       ],
-      "cvssDetails": [],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "severity": "low",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+          "cvssV3BaseScore": 3.7,
+          "modificationTime": "2026-06-25T05:36:39.619260Z"
+        }
+      ],
       "cvssSources": [
         {
           "type": "primary",
@@ -953,7 +945,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.3,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-23T14:05:24.190090Z"
+          "modificationTime": "2026-06-25T05:36:40.655359Z"
         },
         {
           "type": "secondary",
@@ -962,7 +954,16 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "low",
           "baseScore": 3.7,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-23T14:05:24.190090Z"
+          "modificationTime": "2026-06-25T05:36:40.655359Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+          "assigner": "Red Hat",
+          "severity": "low",
+          "baseScore": 3.7,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-06-25T05:36:39.619260Z"
         }
       ],
       "description": "## Overview\n[axios](https://www.npmjs.com/package/axios) is a promise-based HTTP client for the browser and Node.js.\n\nAffected versions of this package are vulnerable to Improper Encoding or Escaping of Output through the `encode` function in `AxiosURLSearchParams`. An attacker can smuggle a NUL byte into serialized query strings by supplying crafted parameter values, causing downstream parsers or backend components to misinterpret the request and potentially truncate or alter parameter handling.\r\n\r\n**Notes:** Standard axios request flow (`buildURL`) uses its own encode function, which does NOT have this bug. Only triggered via direct `AxiosURLSearchParams.toString()` without an encoder, or via custom `paramsSerializer` delegation\n## Remediation\nUpgrade `axios` to version 0.31.1, 1.15.1 or higher.\n## References\n- [GitHub Commit](https://github.com/axios/axios/commit/44bca902e1bdd7dd6490c7b4985b63e729b0e634)\n- [GitHub Commit](https://github.com/axios/axios/commit/5266af94540552e99079caa66bb241bf35b42051)\n- [Maintainer's Advisory](https://github.com/axios/axios/security/advisories/GHSA-xhjh-pmcv-23jw)\n",
@@ -1008,7 +1009,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-04-26T07:50:03.905585Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-23T14:05:24.190090Z",
+      "modificationTime": "2026-06-25T05:36:40.655359Z",
       "socialTrendAlert": false,
       "severityWithCritical": "medium",
       "from": [
@@ -1022,7 +1023,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16298058",
@@ -1084,7 +1087,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "critical",
           "baseScore": 9.1,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-23T14:05:23.663840Z"
+          "modificationTime": "2026-06-25T15:25:50.531784Z"
         },
         {
           "type": "secondary",
@@ -1093,7 +1096,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.4,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-23T14:05:23.663840Z"
+          "modificationTime": "2026-06-25T15:25:50.531784Z"
         },
         {
           "type": "secondary",
@@ -1148,8 +1151,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-04-26T08:14:36.555529Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-23T14:05:23.663840Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-25T15:25:50.531784Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "critical",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -1162,7 +1165,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16298095",
@@ -1316,7 +1321,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16298130",
@@ -1456,7 +1463,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16298162",
@@ -1594,7 +1603,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16299478",
@@ -1735,7 +1746,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16299904",
@@ -1873,7 +1886,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16299923",
@@ -1942,7 +1957,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.7,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-15T15:55:12.587145Z"
+          "modificationTime": "2026-06-25T15:25:38.085792Z"
         },
         {
           "type": "secondary",
@@ -1951,7 +1966,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-15T15:55:12.587145Z"
+          "modificationTime": "2026-06-25T15:25:38.085792Z"
         },
         {
           "type": "secondary",
@@ -2015,8 +2030,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-04-26T10:02:27.979407Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-15T15:55:12.587145Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-25T15:25:38.085792Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -2029,7 +2044,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-16299925",
@@ -2185,7 +2202,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-17111060",
@@ -2324,7 +2343,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-17111062",
@@ -2386,7 +2407,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.7,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-23T14:04:52.344205Z"
+          "modificationTime": "2026-06-27T15:25:21.914674Z"
         },
         {
           "type": "secondary",
@@ -2395,7 +2416,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.6,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-23T14:04:52.344205Z"
+          "modificationTime": "2026-06-27T15:25:21.914674Z"
         },
         {
           "type": "secondary",
@@ -2448,8 +2469,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-05-31T08:18:56.729203Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-23T14:04:52.344205Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-27T15:25:21.914674Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -2462,7 +2483,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-17111079",
@@ -2601,7 +2624,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-17111081",
@@ -2757,7 +2782,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-17172532",
@@ -2901,7 +2928,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-17172681",
@@ -2971,7 +3000,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.7,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-23T14:04:51.795476Z"
+          "modificationTime": "2026-06-27T15:25:17.408975Z"
         },
         {
           "type": "secondary",
@@ -2980,7 +3009,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-23T14:04:51.795476Z"
+          "modificationTime": "2026-06-27T15:25:17.408975Z"
         },
         {
           "type": "secondary",
@@ -3035,8 +3064,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-06-05T07:50:28.296301Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-23T14:04:51.795476Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-27T15:25:17.408975Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -3049,7 +3078,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-17172930",
@@ -3209,7 +3240,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-6032459",
@@ -3357,7 +3390,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-6124857",
@@ -3475,7 +3510,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-9292519",
@@ -3664,7 +3701,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-AXIOS-9403194",
@@ -3780,7 +3819,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "axios",
-      "version": "0.21.0"
+      "version": "0.21.0",
+      "__filename": "/project/node_modules/axios/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-BODYPARSER-7926860",
@@ -3923,7 +3964,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "body-parser",
-      "version": "1.18.2"
+      "version": "1.18.2",
+      "__filename": "/project/node_modules/express/node_modules/body-parser/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-COOKIE-8163060",
@@ -4061,7 +4104,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "cookie",
-      "version": "0.3.1"
+      "version": "0.3.1",
+      "__filename": "/project/node_modules/express/node_modules/cookie/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-EXPRESS-6474509",
@@ -4191,7 +4236,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "express",
-      "version": "4.16.0"
+      "version": "4.16.0",
+      "__filename": "/project/node_modules/express/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-EXPRESS-7926867",
@@ -4334,7 +4381,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "express",
-      "version": "4.16.0"
+      "version": "4.16.0",
+      "__filename": "/project/node_modules/express/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-INFLIGHT-6095116",
@@ -4434,7 +4483,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "inflight",
-      "version": "1.0.6"
+      "version": "1.0.6",
+      "__filename": "/project/node_modules/inflight/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-INFLIGHT-6095116",
@@ -4535,7 +4586,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "inflight",
-      "version": "1.0.6"
+      "version": "1.0.6",
+      "__filename": "/project/node_modules/inflight/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-INFLIGHT-6095116",
@@ -4637,7 +4690,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "inflight",
-      "version": "1.0.6"
+      "version": "1.0.6",
+      "__filename": "/project/node_modules/inflight/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-INFLIGHT-6095116",
@@ -4740,7 +4795,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "inflight",
-      "version": "1.0.6"
+      "version": "1.0.6",
+      "__filename": "/project/node_modules/inflight/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-INFLIGHT-6095116",
@@ -4844,7 +4901,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "inflight",
-      "version": "1.0.6"
+      "version": "1.0.6",
+      "__filename": "/project/node_modules/inflight/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-JSONWEBTOKEN-3180022",
@@ -4967,7 +5026,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "jsonwebtoken",
-      "version": "8.5.1"
+      "version": "8.5.1",
+      "__filename": "/project/node_modules/jsonwebtoken/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-JSONWEBTOKEN-3180024",
@@ -5090,7 +5151,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "jsonwebtoken",
-      "version": "8.5.1"
+      "version": "8.5.1",
+      "__filename": "/project/node_modules/jsonwebtoken/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-JSONWEBTOKEN-3180026",
@@ -5213,7 +5276,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "jsonwebtoken",
-      "version": "8.5.1"
+      "version": "8.5.1",
+      "__filename": "/project/node_modules/jsonwebtoken/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-LODASH-1018905",
@@ -5351,7 +5416,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "lodash",
-      "version": "4.17.20"
+      "version": "4.17.20",
+      "__filename": "/project/node_modules/lodash/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-LODASH-1040724",
@@ -5497,7 +5564,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "lodash",
-      "version": "4.17.20"
+      "version": "4.17.20",
+      "__filename": "/project/node_modules/lodash/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-LODASH-15053838",
@@ -5534,13 +5603,6 @@ Status: Downloaded newer image for snyk/snyk:node-18
       ],
       "cvssDetails": [
         {
-          "assigner": "SUSE",
-          "severity": "high",
-          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
-          "cvssV3BaseScore": 8.2,
-          "modificationTime": "2026-02-12T11:04:11.049925Z"
-        },
-        {
           "assigner": "NVD",
           "severity": "medium",
           "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
@@ -5552,7 +5614,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
           "cvssV3BaseScore": 8.2,
-          "modificationTime": "2026-06-18T05:35:17.816036Z"
+          "modificationTime": "2026-06-30T07:10:07.152797Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
+          "cvssV3BaseScore": 8.2,
+          "modificationTime": "2026-02-12T11:04:11.049925Z"
         }
       ],
       "cvssSources": [
@@ -5563,7 +5632,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.9,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-19T02:01:23.274418Z"
+          "modificationTime": "2026-06-30T07:10:08.092779Z"
         },
         {
           "type": "secondary",
@@ -5572,16 +5641,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-19T02:01:23.274418Z"
-        },
-        {
-          "type": "secondary",
-          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
-          "assigner": "SUSE",
-          "severity": "high",
-          "baseScore": 8.2,
-          "cvssVersion": "3.1",
-          "modificationTime": "2026-02-12T11:04:11.049925Z"
+          "modificationTime": "2026-06-30T07:10:08.092779Z"
         },
         {
           "type": "secondary",
@@ -5599,7 +5659,16 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.2,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-18T05:35:17.816036Z"
+          "modificationTime": "2026-06-30T07:10:07.152797Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
+          "assigner": "SUSE",
+          "severity": "high",
+          "baseScore": 8.2,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-02-12T11:04:11.049925Z"
         }
       ],
       "description": "## Overview\n[lodash](https://www.npmjs.com/package/lodash) is a modern JavaScript utility library delivering modularity, performance, & extras.\n\nAffected versions of this package are vulnerable to Prototype Pollution via the `_.unset` and `_.omit` functions. An attacker can delete methods held in properties of global prototypes but cannot overwrite those properties.\n\n## Details\n\nPrototype Pollution is a vulnerability affecting JavaScript. Prototype Pollution refers to the ability to inject properties into existing JavaScript language construct prototypes, such as objects. JavaScript allows all Object attributes to be altered, including their magical attributes such as `__proto__`, `constructor` and `prototype`. An attacker manipulates these attributes to overwrite, or pollute, a JavaScript application object prototype of the base object by injecting other values.  Properties on the `Object.prototype` are then inherited by all the JavaScript objects through the prototype chain. When that happens, this leads to either denial of service by triggering JavaScript exceptions, or it tampers with the application source code to force the code path that the attacker injects, thereby leading to remote code execution.\n\nThere are two main ways in which the pollution of prototypes occurs:\n\n-   Unsafe `Object` recursive merge\n    \n-   Property definition by path\n    \n\n### Unsafe Object recursive merge\n\nThe logic of a vulnerable recursive merge function follows the following high-level model:\n```\nmerge (target, source)\n\n  foreach property of source\n\n    if property exists and is an object on both the target and the source\n\n      merge(target[property], source[property])\n\n    else\n\n      target[property] = source[property]\n```\n<br>  \n\nWhen the source object contains a property named `__proto__` defined with `Object.defineProperty()` , the condition that checks if the property exists and is an object on both the target and the source passes and the merge recurses with the target, being the prototype of `Object` and the source of `Object` as defined by the attacker. Properties are then copied on the `Object` prototype.\n\nClone operations are a special sub-class of unsafe recursive merges, which occur when a recursive merge is conducted on an empty object: `merge({},source)`.\n\n`lodash` and `Hoek` are examples of libraries susceptible to recursive merge attacks.\n\n### Property definition by path\n\nThere are a few JavaScript libraries that use an API to define property values on an object based on a given path. The function that is generally affected contains this signature: `theFunction(object, path, value)`\n\nIf the attacker can control the value of ÔÇ£pathÔÇØ, they can set this value to `__proto__.myValue`. `myValue` is then assigned to the prototype of the class of the object.\n\n## Types of attacks\n\nThere are a few methods by which Prototype Pollution can be manipulated:\n\n| Type |Origin  |Short description |\n|--|--|--|\n| **Denial of service (DoS)**|Client  |This is the most likely attack. <br>DoS occurs when `Object` holds generic functions that are implicitly called for various operations (for example, `toString` and `valueOf`). <br> The attacker pollutes `Object.prototype.someattr` and alters its state to an unexpected value such as `Int` or `Object`. In this case, the code fails and is likely to cause a denial of service.  <br>**For example:** if an attacker pollutes `Object.prototype.toString` by defining it as an integer, if the codebase at any point was reliant on `someobject.toString()` it would fail. |\n |**Remote Code Execution**|Client|Remote code execution is generally only possible in cases where the codebase evaluates a specific attribute of an object, and then executes that evaluation.<br>**For example:** `eval(someobject.someattr)`. In this case, if the attacker pollutes `Object.prototype.someattr` they are likely to be able to leverage this in order to execute code.|\n|**Property Injection**|Client|The attacker pollutes properties that the codebase relies on for their informative value, including security properties such as cookies or tokens.<br>  **For example:** if a codebase checks privileges for `someuser.isAdmin`, then when the attacker pollutes `Object.prototype.isAdmin` and sets it to equal `true`, they can then achieve admin privileges.|\n\n## Affected environments\n\nThe following environments are susceptible to a Prototype Pollution attack:\n\n-   Application server\n    \n-   Web server\n\n-   Web browser\n    \n\n## How to prevent\n\n1.  Freeze the prototypeÔÇö use `Object.freeze (Object.prototype)`.\n    \n2.  Require schema validation of JSON input.\n    \n3.  Avoid using unsafe recursive merge functions.\n    \n4.  Consider using objects without prototypes (for example, `Object.create(null)`), breaking the prototype chain and preventing pollution.\n    \n5.  As a best practice use `Map` instead of `Object`.\n\n### For more information on this vulnerability type:\n\n[Arteau, Olivier. ÔÇ£JavaScript prototype pollution attack in NodeJS application.ÔÇØ GitHub, 26 May 2018](https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf)\n\n## Remediation\nUpgrade `lodash` to version 4.17.23 or higher.\n## References\n- [GitHub Commit](https://github.com/lodash/lodash/commit/edadd452146f7e4bad4ea684e955708931d84d81)\n",
@@ -5643,7 +5712,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-01-22T07:08:27.179012Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-19T02:01:23.274418Z",
+      "modificationTime": "2026-06-30T07:10:08.092779Z",
       "socialTrendAlert": false,
       "severityWithCritical": "medium",
       "from": [
@@ -5657,7 +5726,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "lodash",
-      "version": "4.17.20"
+      "version": "4.17.20",
+      "__filename": "/project/node_modules/lodash/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-LODASH-15869619",
@@ -5728,7 +5799,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.9,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-15T15:52:17.728477Z"
+          "modificationTime": "2026-06-27T14:03:06.630788Z"
         },
         {
           "type": "secondary",
@@ -5737,7 +5808,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-15T15:52:17.728477Z"
+          "modificationTime": "2026-06-27T14:03:06.630788Z"
         },
         {
           "type": "secondary",
@@ -5760,8 +5831,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       ],
       "description": "## Overview\n[lodash](https://www.npmjs.com/package/lodash) is a modern JavaScript utility library delivering modularity, performance, & extras.\n\nAffected versions of this package are vulnerable to Prototype Pollution via the `_.unset` and `_.omit` functions. An attacker can delete properties from built-in prototypes by supplying array-wrapped path segments, potentially impacting application behaviour.\r\n\r\n**Notes:**\r\n\r\n1) Version 4.18.0 was intended to fix this vulnerability but it got deprecated due to introducing a breaking [functionality issue](https://github.com/lodash/lodash/issues/6167).\r\n\r\n2) This issue is due to incomplete fix for [CVE-2025-13465](https://security.snyk.io/vuln/SNYK-JS-LODASH-15053838) which protects only against string key members.\n\n## Details\n\nPrototype Pollution is a vulnerability affecting JavaScript. Prototype Pollution refers to the ability to inject properties into existing JavaScript language construct prototypes, such as objects. JavaScript allows all Object attributes to be altered, including their magical attributes such as `__proto__`, `constructor` and `prototype`. An attacker manipulates these attributes to overwrite, or pollute, a JavaScript application object prototype of the base object by injecting other values.  Properties on the `Object.prototype` are then inherited by all the JavaScript objects through the prototype chain. When that happens, this leads to either denial of service by triggering JavaScript exceptions, or it tampers with the application source code to force the code path that the attacker injects, thereby leading to remote code execution.\n\nThere are two main ways in which the pollution of prototypes occurs:\n\n-   Unsafe `Object` recursive merge\n    \n-   Property definition by path\n    \n\n### Unsafe Object recursive merge\n\nThe logic of a vulnerable recursive merge function follows the following high-level model:\n```\nmerge (target, source)\n\n  foreach property of source\n\n    if property exists and is an object on both the target and the source\n\n      merge(target[property], source[property])\n\n    else\n\n      target[property] = source[property]\n```\n<br>  \n\nWhen the source object contains a property named `__proto__` defined with `Object.defineProperty()` , the condition that checks if the property exists and is an object on both the target and the source passes and the merge recurses with the target, being the prototype of `Object` and the source of `Object` as defined by the attacker. Properties are then copied on the `Object` prototype.\n\nClone operations are a special sub-class of unsafe recursive merges, which occur when a recursive merge is conducted on an empty object: `merge({},source)`.\n\n`lodash` and `Hoek` are examples of libraries susceptible to recursive merge attacks.\n\n### Property definition by path\n\nThere are a few JavaScript libraries that use an API to define property values on an object based on a given path. The function that is generally affected contains this signature: `theFunction(object, path, value)`\n\nIf the attacker can control the value of ÔÇ£pathÔÇØ, they can set this value to `__proto__.myValue`. `myValue` is then assigned to the prototype of the class of the object.\n\n## Types of attacks\n\nThere are a few methods by which Prototype Pollution can be manipulated:\n\n| Type |Origin  |Short description |\n|--|--|--|\n| **Denial of service (DoS)**|Client  |This is the most likely attack. <br>DoS occurs when `Object` holds generic functions that are implicitly called for various operations (for example, `toString` and `valueOf`). <br> The attacker pollutes `Object.prototype.someattr` and alters its state to an unexpected value such as `Int` or `Object`. In this case, the code fails and is likely to cause a denial of service.  <br>**For example:** if an attacker pollutes `Object.prototype.toString` by defining it as an integer, if the codebase at any point was reliant on `someobject.toString()` it would fail. |\n |**Remote Code Execution**|Client|Remote code execution is generally only possible in cases where the codebase evaluates a specific attribute of an object, and then executes that evaluation.<br>**For example:** `eval(someobject.someattr)`. In this case, if the attacker pollutes `Object.prototype.someattr` they are likely to be able to leverage this in order to execute code.|\n|**Property Injection**|Client|The attacker pollutes properties that the codebase relies on for their informative value, including security properties such as cookies or tokens.<br>  **For example:** if a codebase checks privileges for `someuser.isAdmin`, then when the attacker pollutes `Object.prototype.isAdmin` and sets it to equal `true`, they can then achieve admin privileges.|\n\n## Affected environments\n\nThe following environments are susceptible to a Prototype Pollution attack:\n\n-   Application server\n    \n-   Web server\n\n-   Web browser\n    \n\n## How to prevent\n\n1.  Freeze the prototypeÔÇö use `Object.freeze (Object.prototype)`.\n    \n2.  Require schema validation of JSON input.\n    \n3.  Avoid using unsafe recursive merge functions.\n    \n4.  Consider using objects without prototypes (for example, `Object.create(null)`), breaking the prototype chain and preventing pollution.\n    \n5.  As a best practice use `Map` instead of `Object`.\n\n### For more information on this vulnerability type:\n\n[Arteau, Olivier. ÔÇ£JavaScript prototype pollution attack in NodeJS application.ÔÇØ GitHub, 26 May 2018](https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf)\n\n## Remediation\nUpgrade `lodash` to version 4.18.1 or higher.\n## References\n- [GitHub Advisory](https://github.com/lodash/lodash/security/advisories/GHSA-f23m-r3pf-42rh)\n- [GitHub Commit](https://github.com/lodash/lodash/commit/fe8d32eda854377349a4f922ab7655c8e5df9a0b)\n- [GitHub Issue](https://github.com/lodash/lodash/issues/6167)\n",
       "epssDetails": {
-        "percentile": "0.21146",
-        "probability": "0.00297",
+        "percentile": "0.23511",
+        "probability": "0.00317",
         "modelVersion": "v2026.06.15"
       },
       "identifiers": {
@@ -5799,7 +5870,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-04-01T10:06:10.804459Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-15T15:52:17.728477Z",
+      "modificationTime": "2026-06-27T14:03:06.630788Z",
       "socialTrendAlert": false,
       "severityWithCritical": "medium",
       "from": [
@@ -5813,7 +5884,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "lodash",
-      "version": "4.17.20"
+      "version": "4.17.20",
+      "__filename": "/project/node_modules/lodash/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-LODASH-15869625",
@@ -5875,7 +5948,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
           "cvssV3BaseScore": 8.1,
-          "modificationTime": "2026-06-17T06:28:48.545436Z"
+          "modificationTime": "2026-06-25T05:36:37.647141Z"
         }
       ],
       "cvssSources": [
@@ -5886,7 +5959,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.6,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-17T06:28:48.901931Z"
+          "modificationTime": "2026-06-25T15:25:58.740396Z"
         },
         {
           "type": "secondary",
@@ -5895,7 +5968,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.2,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-17T06:28:48.901931Z"
+          "modificationTime": "2026-06-25T15:25:58.740396Z"
         },
         {
           "type": "secondary",
@@ -5913,7 +5986,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.1,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-17T06:28:48.545436Z"
+          "modificationTime": "2026-06-25T05:36:37.647141Z"
         }
       ],
       "description": "## Overview\n[lodash](https://www.npmjs.com/package/lodash) is a modern JavaScript utility library delivering modularity, performance, & extras.\n\nAffected versions of this package are vulnerable to Arbitrary Code Injection due the improper validation of `options.imports` key names in `_.template`. An attacker can execute arbitrary code at template compilation time by injecting malicious expressions. If `Object.prototype` has been polluted, inherited properties may also be copied into the imports object and executed.\r\n\r\n**Notes:**\r\n\r\n1) Version 4.18.0 was intended to fix this vulnerability but it got deprecated due to introducing a breaking [functionality issue](https://github.com/lodash/lodash/issues/6167).\r\n\r\n2) This issue is due to the incomplete fix for [CVE-2021-23337](https://security.snyk.io/vuln/SNYK-JS-LODASH-1040724).\n## Remediation\nUpgrade `lodash` to version 4.18.1 or higher.\n## References\n- [GitHub Advisory](https://github.com/lodash/lodash/security/advisories/GHSA-r5fr-rjxr-66jc)\n- [GitHub Commit](https://github.com/lodash/lodash/commit/879aaa93132d78c2f8d20c60279da9f8b21576d6)\n- [GitHub Issue](https://github.com/lodash/lodash/issues/6167)\n- [OpenJS Security Advisory](https://cna.openjsf.org/security-advisories.html)\n",
@@ -5957,8 +6030,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-04-01T10:32:00.027414Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-17T06:28:48.901931Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-25T15:25:58.740396Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -5971,7 +6044,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "lodash",
-      "version": "4.17.20"
+      "version": "4.17.20",
+      "__filename": "/project/node_modules/lodash/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MARKED-174116",
@@ -6079,7 +6154,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MARKED-2342073",
@@ -6216,7 +6293,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MARKED-2342082",
@@ -6357,7 +6436,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MARKED-451540",
@@ -6455,7 +6536,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MARKED-584281",
@@ -6550,7 +6633,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "npm:marked:20170112",
@@ -6703,7 +6788,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": true,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "npm:marked:20170815",
@@ -6813,7 +6900,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "npm:marked:20170815-1",
@@ -6923,7 +7012,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "npm:marked:20170907",
@@ -7065,7 +7156,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": true,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "npm:marked:20180225",
@@ -7201,7 +7294,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "marked",
-      "version": "0.3.6"
+      "version": "0.3.6",
+      "__filename": "/project/node_modules/marked/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-10185673",
@@ -7249,7 +7344,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.7,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-15T15:44:29.434255Z"
+          "modificationTime": "2026-06-29T14:03:41.534334Z"
         },
         {
           "type": "secondary",
@@ -7258,13 +7353,13 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-15T15:44:29.434255Z"
+          "modificationTime": "2026-06-29T14:03:41.534334Z"
         }
       ],
       "description": "## Overview\n\nAffected versions of this package are vulnerable to Uncaught Exception due to an `error` event thrown by `busboy`. An attacker can cause a full nodejs application to crash by sending a specially crafted multi-part upload request.\n## PoC\n```javascript\r\nconst express = require('express')\r\nconst multer  = require('multer')\r\nconst http  = require('http')\r\nconst upload = multer({ dest: 'uploads/' })\r\nconst port = 8888\r\n\r\nconst app = express()\r\n\r\napp.post('/upload', upload.single('file'), function (req, res) {\r\n  res.send({})\r\n})\r\n\r\napp.listen(port, () => {\r\n  console.log(`Listening on port ${port}`)\r\n\r\n  const boundary = 'AaB03x'\r\n  const body = [\r\n    '--' + boundary,\r\n    'Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"',\r\n    'Content-Type: text/plain',\r\n    '',\r\n    'test without end boundary'\r\n  ].join('\\r\\n')\r\n  const options = {\r\n    hostname: 'localhost',\r\n    port,\r\n    path: '/upload',\r\n    method: 'POST',\r\n    headers: {\r\n      'content-type': 'multipart/form-data; boundary=' + boundary,\r\n      'content-length': body.length,\r\n    }\r\n  }\r\n  const req = http.request(options, (res) => {\r\n    console.log(res.statusCode)\r\n  })\r\n  req.on('error', (err) => {\r\n    console.error(err)\r\n  })\r\n  req.write(body)\r\n  req.end()\r\n})\r\n```\n## Remediation\nUpgrade `multer` to version 2.0.0 or higher.\n## References\n- [GitHub Commit](https://github.com/expressjs/multer/commit/2c8505f207d923dd8de13a9f93a4563e59933665)\n- [GitHub Issue](https://github.com/expressjs/multer/issues/1176)\n",
       "epssDetails": {
-        "percentile": "0.46723",
-        "probability": "0.00665",
+        "percentile": "0.48400",
+        "probability": "0.00697",
         "modelVersion": "v2026.06.15"
       },
       "identifiers": {
@@ -7304,7 +7399,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2025-05-20T14:50:49.586509Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-15T15:44:29.434255Z",
+      "modificationTime": "2026-06-29T14:03:41.534334Z",
       "socialTrendAlert": false,
       "severityWithCritical": "high",
       "from": [
@@ -7318,7 +7413,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-10185675",
@@ -7366,7 +7463,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.7,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-15T15:49:06.010935Z"
+          "modificationTime": "2026-06-29T14:03:41.766429Z"
         },
         {
           "type": "secondary",
@@ -7375,13 +7472,13 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-15T15:49:06.010935Z"
+          "modificationTime": "2026-06-29T14:03:41.766429Z"
         }
       ],
       "description": "## Overview\n\nAffected versions of this package are vulnerable to Missing Release of Memory after Effective Lifetime due to improper handling of error events in HTTP request streams, which fails to close the internal `busboy` stream. An attacker can cause a denial of service by repeatedly triggering errors in file upload streams, leading to resource exhaustion and memory leaks.\r\n\r\n**Note:**\r\n\r\nThis is only exploitable if the server is handling file uploads.\n## Remediation\nUpgrade `multer` to version 2.0.0 or higher.\n## References\n- [GitHub Commit](https://github.com/expressjs/multer/commit/2c8505f207d923dd8de13a9f93a4563e59933665)\n- [GitHub PR](https://github.com/expressjs/multer/pull/1120)\n",
       "epssDetails": {
-        "percentile": "0.46150",
-        "probability": "0.00651",
+        "percentile": "0.47869",
+        "probability": "0.00683",
         "modelVersion": "v2026.06.15"
       },
       "identifiers": {
@@ -7419,7 +7516,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2025-05-20T13:48:08.453751Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-15T15:49:06.010935Z",
+      "modificationTime": "2026-06-29T14:03:41.766429Z",
       "socialTrendAlert": false,
       "severityWithCritical": "high",
       "from": [
@@ -7433,7 +7530,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-10299078",
@@ -7552,7 +7651,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-10773732",
@@ -7675,7 +7776,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-15365916",
@@ -7823,7 +7926,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-15365918",
@@ -7971,7 +8076,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-15417528",
@@ -8023,7 +8130,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.7,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-15T15:58:43.512905Z"
+          "modificationTime": "2026-06-25T15:25:59.452372Z"
         },
         {
           "type": "secondary",
@@ -8032,7 +8139,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.5,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-15T15:58:43.512905Z"
+          "modificationTime": "2026-06-25T15:25:59.452372Z"
         },
         {
           "type": "secondary",
@@ -8085,8 +8192,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-03-05T07:56:12.047201Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-15T15:58:43.512905Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-25T15:25:59.452372Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -8099,7 +8206,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-MULTER-17342512",
@@ -8216,7 +8325,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "multer",
-      "version": "1.4.5-lts.2"
+      "version": "1.4.5-lts.2",
+      "__filename": "/project/node_modules/multer/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-PATHTOREGEXP-15789761",
@@ -8350,7 +8461,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "path-to-regexp",
-      "version": "0.1.7"
+      "version": "0.1.7",
+      "__filename": "/project/node_modules/path-to-regexp/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-PATHTOREGEXP-7925106",
@@ -8506,7 +8619,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "path-to-regexp",
-      "version": "0.1.7"
+      "version": "0.1.7",
+      "__filename": "/project/node_modules/path-to-regexp/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-PATHTOREGEXP-8482416",
@@ -8642,7 +8757,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "path-to-regexp",
-      "version": "0.1.7"
+      "version": "0.1.7",
+      "__filename": "/project/node_modules/path-to-regexp/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-QS-14724253",
@@ -8774,7 +8891,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "qs",
-      "version": "6.5.1"
+      "version": "6.5.1",
+      "__filename": "/project/node_modules/express/node_modules/qs/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-QS-3153490",
@@ -8935,7 +9054,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "qs",
-      "version": "6.5.1"
+      "version": "6.5.1",
+      "__filename": "/project/node_modules/express/node_modules/qs/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-QS-14724253",
@@ -9064,12 +9185,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
         false,
         "express@4.22.0",
         "body-parser@1.20.5",
-        "qs@6.15.2"
+        "qs@6.15.3"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "qs",
-      "version": "6.5.1"
+      "version": "6.5.1",
+      "__filename": "/project/node_modules/express/node_modules/qs/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-QS-3153490",
@@ -9232,7 +9355,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "qs",
-      "version": "6.5.1"
+      "version": "6.5.1",
+      "__filename": "/project/node_modules/express/node_modules/qs/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-QS-16721866",
@@ -9346,12 +9471,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "body-parser@1.20.5",
-        "qs@6.15.2"
+        "qs@6.15.3"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "qs",
-      "version": "6.15.1"
+      "version": "6.15.1",
+      "__filename": "/project/node_modules/qs/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-SEND-7926862",
@@ -9496,7 +9623,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "send",
-      "version": "0.16.0"
+      "version": "0.16.0",
+      "__filename": "/project/node_modules/send/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-SEND-7926862",
@@ -9643,7 +9772,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "send",
-      "version": "0.16.0"
+      "version": "0.16.0",
+      "__filename": "/project/node_modules/send/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-SERVESTATIC-7926865",
@@ -9792,7 +9923,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "serve-static",
-      "version": "1.13.0"
+      "version": "1.13.0",
+      "__filename": "/project/node_modules/serve-static/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15032660",
@@ -9940,12 +10073,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "sqlite3@6.0.1",
-        "tar@7.5.16"
+        "tar@7.5.19"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15038581",
@@ -10089,12 +10224,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "sqlite3@6.0.1",
-        "tar@7.5.16"
+        "tar@7.5.19"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15127355",
@@ -10219,12 +10356,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "sqlite3@6.0.1",
-        "tar@7.5.16"
+        "tar@7.5.19"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15307072",
@@ -10371,12 +10510,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "sqlite3@6.0.1",
-        "tar@7.5.16"
+        "tar@7.5.19"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15416075",
@@ -10522,12 +10663,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "sqlite3@6.0.1",
-        "tar@7.5.16"
+        "tar@7.5.19"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15456201",
@@ -10586,7 +10729,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.2,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-16T02:00:57.050779Z"
+          "modificationTime": "2026-06-27T02:01:22.007861Z"
         },
         {
           "type": "secondary",
@@ -10595,7 +10738,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.1,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-16T02:00:57.050779Z"
+          "modificationTime": "2026-06-27T02:01:22.007861Z"
         },
         {
           "type": "secondary",
@@ -10659,8 +10802,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-03-11T08:15:39.582545Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-16T02:00:57.050779Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-27T02:01:22.007861Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -10670,12 +10813,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "sqlite3@6.0.1",
-        "tar@7.5.16"
+        "tar@7.5.19"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-17342362",
@@ -10723,7 +10868,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.9,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-23T14:06:15.052660Z"
+          "modificationTime": "2026-06-27T14:03:29.704112Z"
         },
         {
           "type": "secondary",
@@ -10732,13 +10877,13 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.2,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-23T14:06:15.052660Z"
+          "modificationTime": "2026-06-27T14:03:29.704112Z"
         }
       ],
       "description": "## Overview\n[tar](https://www.npmjs.com/package/tar) is a full-featured Tar for Node.js.\n\nAffected versions of this package are vulnerable to Interpretation Conflict due to improper handling of PAX extended header `size` overrides in intermediary metadata headers. An attacker can cause inconsistent archive parsing results between different tar implementations by crafting a malicious tar archive that desynchronizes the parser's interpretation, potentially hiding files from scanners or extractors that rely on different tools.\n## Remediation\nUpgrade `tar` to version 7.5.16 or higher.\n## References\n- [GitHub Advisory](https://github.com/isaacs/node-tar/security/advisories/GHSA-vmf3-w455-68vh)\n- [GitHub Commit](https://github.com/isaacs/node-tar/commit/21a822027658c8063542be330530bbecdf0dbbfe)\n",
       "epssDetails": {
-        "percentile": "0.01941",
-        "probability": "0.00117",
+        "percentile": "0.01353",
+        "probability": "0.00107",
         "modelVersion": "v2026.06.15"
       },
       "identifiers": {
@@ -10778,7 +10923,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-06-16T07:58:49.041722Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-23T14:06:15.052660Z",
+      "modificationTime": "2026-06-27T14:03:29.704112Z",
       "socialTrendAlert": false,
       "severityWithCritical": "medium",
       "from": [
@@ -10789,12 +10934,14 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "upgradePath": [
         false,
         "sqlite3@6.0.1",
-        "tar@7.5.16"
+        "tar@7.5.19"
       ],
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15032660",
@@ -10947,7 +11094,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15038581",
@@ -11096,7 +11245,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15127355",
@@ -11226,7 +11377,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15307072",
@@ -11378,7 +11531,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15416075",
@@ -11529,7 +11684,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15456201",
@@ -11588,7 +11745,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.2,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-16T02:00:57.050779Z"
+          "modificationTime": "2026-06-27T02:01:22.007861Z"
         },
         {
           "type": "secondary",
@@ -11597,7 +11754,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.1,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-16T02:00:57.050779Z"
+          "modificationTime": "2026-06-27T02:01:22.007861Z"
         },
         {
           "type": "secondary",
@@ -11661,8 +11818,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-03-11T08:15:39.582545Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-16T02:00:57.050779Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-27T02:01:22.007861Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -11677,7 +11834,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-17342362",
@@ -11725,7 +11884,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.9,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-23T14:06:15.052660Z"
+          "modificationTime": "2026-06-27T14:03:29.704112Z"
         },
         {
           "type": "secondary",
@@ -11734,13 +11893,13 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.2,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-23T14:06:15.052660Z"
+          "modificationTime": "2026-06-27T14:03:29.704112Z"
         }
       ],
       "description": "## Overview\n[tar](https://www.npmjs.com/package/tar) is a full-featured Tar for Node.js.\n\nAffected versions of this package are vulnerable to Interpretation Conflict due to improper handling of PAX extended header `size` overrides in intermediary metadata headers. An attacker can cause inconsistent archive parsing results between different tar implementations by crafting a malicious tar archive that desynchronizes the parser's interpretation, potentially hiding files from scanners or extractors that rely on different tools.\n## Remediation\nUpgrade `tar` to version 7.5.16 or higher.\n## References\n- [GitHub Advisory](https://github.com/isaacs/node-tar/security/advisories/GHSA-vmf3-w455-68vh)\n- [GitHub Commit](https://github.com/isaacs/node-tar/commit/21a822027658c8063542be330530bbecdf0dbbfe)\n",
       "epssDetails": {
-        "percentile": "0.01941",
-        "probability": "0.00117",
+        "percentile": "0.01353",
+        "probability": "0.00107",
         "modelVersion": "v2026.06.15"
       },
       "identifiers": {
@@ -11780,7 +11939,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-06-16T07:58:49.041722Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-23T14:06:15.052660Z",
+      "modificationTime": "2026-06-27T14:03:29.704112Z",
       "socialTrendAlert": false,
       "severityWithCritical": "medium",
       "from": [
@@ -11796,7 +11955,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15032660",
@@ -11951,7 +12112,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15038581",
@@ -12102,7 +12265,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15127355",
@@ -12234,7 +12399,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15307072",
@@ -12388,7 +12555,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15416075",
@@ -12541,7 +12710,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-15456201",
@@ -12600,7 +12771,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 8.2,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-16T02:00:57.050779Z"
+          "modificationTime": "2026-06-27T02:01:22.007861Z"
         },
         {
           "type": "secondary",
@@ -12609,7 +12780,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "high",
           "baseScore": 7.1,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-16T02:00:57.050779Z"
+          "modificationTime": "2026-06-27T02:01:22.007861Z"
         },
         {
           "type": "secondary",
@@ -12673,8 +12844,8 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-03-11T08:15:39.582545Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-16T02:00:57.050779Z",
-      "socialTrendAlert": false,
+      "modificationTime": "2026-06-27T02:01:22.007861Z",
+      "socialTrendAlert": true,
       "severityWithCritical": "high",
       "from": [
         "vulnerable-shop@1.0.0",
@@ -12691,7 +12862,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TAR-17342362",
@@ -12739,7 +12912,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.9,
           "cvssVersion": "4.0",
-          "modificationTime": "2026-06-23T14:06:15.052660Z"
+          "modificationTime": "2026-06-27T14:03:29.704112Z"
         },
         {
           "type": "secondary",
@@ -12748,13 +12921,13 @@ Status: Downloaded newer image for snyk/snyk:node-18
           "severity": "medium",
           "baseScore": 6.2,
           "cvssVersion": "3.1",
-          "modificationTime": "2026-06-23T14:06:15.052660Z"
+          "modificationTime": "2026-06-27T14:03:29.704112Z"
         }
       ],
       "description": "## Overview\n[tar](https://www.npmjs.com/package/tar) is a full-featured Tar for Node.js.\n\nAffected versions of this package are vulnerable to Interpretation Conflict due to improper handling of PAX extended header `size` overrides in intermediary metadata headers. An attacker can cause inconsistent archive parsing results between different tar implementations by crafting a malicious tar archive that desynchronizes the parser's interpretation, potentially hiding files from scanners or extractors that rely on different tools.\n## Remediation\nUpgrade `tar` to version 7.5.16 or higher.\n## References\n- [GitHub Advisory](https://github.com/isaacs/node-tar/security/advisories/GHSA-vmf3-w455-68vh)\n- [GitHub Commit](https://github.com/isaacs/node-tar/commit/21a822027658c8063542be330530bbecdf0dbbfe)\n",
       "epssDetails": {
-        "percentile": "0.01941",
-        "probability": "0.00117",
+        "percentile": "0.01353",
+        "probability": "0.00107",
         "modelVersion": "v2026.06.15"
       },
       "identifiers": {
@@ -12794,7 +12967,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "packageManager": "npm",
       "publicationTime": "2026-06-16T07:58:49.041722Z",
       "severityBasedOn": "CVSS",
-      "modificationTime": "2026-06-23T14:06:15.052660Z",
+      "modificationTime": "2026-06-27T14:03:29.704112Z",
       "socialTrendAlert": false,
       "severityWithCritical": "medium",
       "from": [
@@ -12812,7 +12985,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "tar",
-      "version": "6.2.1"
+      "version": "6.2.1",
+      "__filename": "/project/node_modules/tar/package.json",
+      "parentDepType": "prod"
     },
     {
       "id": "SNYK-JS-TOOTALLNATEONCE-15250612",
@@ -12949,7 +13124,9 @@ Status: Downloaded newer image for snyk/snyk:node-18
       "isUpgradable": true,
       "isPatchable": false,
       "name": "@tootallnate/once",
-      "version": "1.1.2"
+      "version": "1.1.2",
+      "__filename": "/project/node_modules/@tootallnate/once/package.json",
+      "parentDepType": "prod"
     }
   ],
   "ok": false,
@@ -13270,7 +13447,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
         "upgradePath": [
           false,
           "body-parser@1.20.5",
-          "qs@6.15.2"
+          "qs@6.15.3"
         ],
         "isUpgradable": true,
         "isPatchable": false,
@@ -13623,7 +13800,7 @@ Status: Downloaded newer image for snyk/snyk:node-18
   },
   "uniqueCount": 73,
   "projectName": "vulnerable-shop",
-  "displayTargetFile": "package-lock.json",
+  "displayTargetFile": "package.json",
   "hasUnknownVersions": false,
   "path": "/project"
 }
