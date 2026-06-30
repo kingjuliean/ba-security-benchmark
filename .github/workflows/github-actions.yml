@@ -118,6 +118,7 @@ jobs:
 
       - name: Semgrep Scan
         uses: semgrep/semgrep-action@v1
+        continue-on-error: true  # Exit-Code 1 bei Findings ist normal
         with:
           config: >-
             p/owasp-top-ten
@@ -248,6 +249,7 @@ jobs:
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
+        continue-on-error: true  # schlägt fehl wenn Automatic Analysis in SonarCloud aktiviert → dort deaktivieren
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}
@@ -257,6 +259,8 @@ jobs:
             -Dsonar.projectKey=kingjuliean_ba-security-benchmark
             -Dsonar.organization=${{ github.repository_owner }}
             -Dsonar.sources=.
+            -Dsonar.inclusions=**/*.js,**/*.ts,**/*.ejs
+            -Dsonar.exclusions=**/node_modules/**,**/*.min.js
             -Dsonar.scm.disabled=true
             -Dsonar.javascript.node.maxspace=2048
 
@@ -392,27 +396,27 @@ jobs:
         run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@v3.0.0
-        with:
-          project: "benchmark-vulnerable-shop"
-          path: "targets/vulnerable-shop/Shop"
-          format: "JSON SARIF"
-          out: "benchmark/results/dependency-check/vulnerable-shop"
-          args: >
-            --enableExperimental
-            --failOnCVSS 0
+        run: |
+          mkdir -p benchmark/results/dependency-check/vulnerable-shop
+          docker run --rm \
+            -v "$(pwd)/targets/vulnerable-shop/Shop:/src:ro" \
+            -v "$(pwd)/benchmark/results/dependency-check/vulnerable-shop:/report" \
+            owasp/dependency-check:latest \
+            --scan /src \
+            --format "JSON" \
+            --format "SARIF" \
+            --out /report \
+            --project "benchmark-vulnerable-shop" \
+            --enableExperimental \
+            || true
 
       - name: Benenne Output einheitlich
         run: |
           dir="benchmark/results/dependency-check/vulnerable-shop"
-          # JSON umbenennen
           [ -f "${dir}/dependency-check-report.json" ] && \
-            cp "${dir}/dependency-check-report.json" \
-               "${dir}/run_${{ env.RUN_NUMBER }}.json" || true
-          # SARIF umbenennen
+            cp "${dir}/dependency-check-report.json" "${dir}/run_${{ env.RUN_NUMBER }}.json" || true
           [ -f "${dir}/dependency-check-report.sarif" ] && \
-            cp "${dir}/dependency-check-report.sarif" \
-               "${dir}/run_${{ env.RUN_NUMBER }}.sarif" || true
+            cp "${dir}/dependency-check-report.sarif" "${dir}/run_${{ env.RUN_NUMBER }}.sarif" || true
 
       - name: "[TIMING] Scan-Ende → CSV"
         run: |
