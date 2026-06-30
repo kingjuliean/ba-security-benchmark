@@ -396,6 +396,8 @@ jobs:
         run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: OWASP Dependency-Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           mkdir -p benchmark/results/dependency-check/vulnerable-shop
           docker run --rm \
@@ -408,6 +410,7 @@ jobs:
             --out /report \
             --project "benchmark-vulnerable-shop" \
             --enableExperimental \
+            ${NVD_API_KEY:+--nvdApiKey "$NVD_API_KEY"} \
             || true
 
       - name: Benenne Output einheitlich
