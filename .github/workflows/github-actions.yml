@@ -117,7 +117,7 @@ jobs:
         run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Semgrep Scan
-        uses: semgrep/semgrep-action@v1.6.0
+        uses: semgrep/semgrep-action@v1
         continue-on-error: true  # Exit-Code 1 bei Findings ist normal
         with:
           config: >-
