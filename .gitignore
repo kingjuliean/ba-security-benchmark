@@ -1,3 +1,6 @@
+# Dependency-Check NVD-Cache (bis zu 640 MB, nicht ins Repo)
+benchmark/.dc-cache/
+
 # Logs
 logs
 *.log
