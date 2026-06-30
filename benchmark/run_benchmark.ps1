@@ -320,6 +320,8 @@ function Run-SonarQube([string]$tgt, [int]$run) {
     $scannerOpts = "-Dsonar.projectKey=$projKey" +
                    " -Dsonar.projectName=benchmark-$tgt" +
                    " -Dsonar.sources=/usr/src" +
+                   " -Dsonar.inclusions=**/*.js,**/*.ts,**/*.ejs" +
+                   " -Dsonar.exclusions=**/node_modules/**,**/*.min.js" +
                    " -Dsonar.scm.disabled=true" +
                    " -Dsonar.javascript.node.maxspace=2048" +
                    " -Dsonar.login=admin" +

@@ -490,7 +490,7 @@
     "FP": 0,
     "FN": 10,
     "TN": 10,
-    "bonus_finds": 1204,
+    "bonus_finds": 3,
     "tp_ids": [],
     "fn_ids": [
       "V01",
@@ -526,7 +526,7 @@
     "FP": 0,
     "FN": 10,
     "TN": 10,
-    "bonus_finds": 1204,
+    "bonus_finds": 3,
     "tp_ids": [],
     "fn_ids": [
       "V01",
@@ -562,7 +562,7 @@
     "FP": 0,
     "FN": 10,
     "TN": 10,
-    "bonus_finds": 1204,
+    "bonus_finds": 3,
     "tp_ids": [],
     "fn_ids": [
       "V01",
