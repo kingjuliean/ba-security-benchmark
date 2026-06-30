@@ -86,7 +86,7 @@ jobs:
           echo "Build-Dauer: ${duration}s"
 
       - name: Cache node_modules für nachfolgende Jobs
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.0.2.0
         with:
           path: targets/vulnerable-shop/Shop/node_modules
           key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
@@ -117,7 +117,7 @@ jobs:
         run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Semgrep Scan
-        uses: semgrep/semgrep-action@v1
+        uses: semgrep/semgrep-action@v1.6.0
         continue-on-error: true  # Exit-Code 1 bei Findings ist normal
         with:
           config: >-
@@ -238,7 +238,7 @@ jobs:
           node-version: "18"
 
       - name: Restore node_modules Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.0
         with:
           path: targets/vulnerable-shop/Shop/node_modules
           key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
@@ -299,7 +299,7 @@ jobs:
           node-version: "18"
 
       - name: Restore node_modules Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.0
         with:
           path: targets/vulnerable-shop/Shop/node_modules
           key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
@@ -347,7 +347,7 @@ jobs:
           node-version: "18"
 
       - name: Restore node_modules Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.0
         with:
           path: targets/vulnerable-shop/Shop/node_modules
           key: node-modules-${{ hashFiles('targets/vulnerable-shop/Shop/package-lock.json') }}
@@ -403,13 +403,14 @@ jobs:
           docker run --rm \
             -v "$(pwd)/targets/vulnerable-shop/Shop:/src:ro" \
             -v "$(pwd)/benchmark/results/dependency-check/vulnerable-shop:/report" \
-            owasp/dependency-check:latest \
+            owasp/dependency-check:10.0.4 \
             --scan /src \
             --format "JSON" \
             --format "SARIF" \
             --out /report \
             --project "benchmark-vulnerable-shop" \
             --enableExperimental \
+            --nvdApiDelay 0 \
             ${NVD_API_KEY:+--nvdApiKey "$NVD_API_KEY"} \
             || true
 
