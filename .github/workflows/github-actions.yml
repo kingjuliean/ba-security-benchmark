@@ -145,9 +145,17 @@ jobs:
         run: |
           end=$(date +%s)
           duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
           echo "semgrep,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
           echo "Semgrep Scan-Dauer: ${duration}s"
+
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: timing-semgrep-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
 
       - name: Upload SARIF → GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3.28.15
@@ -201,9 +209,17 @@ jobs:
         run: |
           end=$(date +%s)
           duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
           echo "codeql,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
           echo "CodeQL Scan-Dauer: ${duration}s"
+
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: timing-codeql-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
 
       - name: Benenne SARIF-Datei einheitlich
         run: |
@@ -324,6 +340,13 @@ jobs:
           echo "npm-audit,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
 
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: timing-npm-audit-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
+
       - name: Upload JSON als Artifact
         uses: actions/upload-artifact@v4.6.2
         if: always()
@@ -371,8 +394,16 @@ jobs:
         run: |
           end=$(date +%s)
           duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
           echo "snyk,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
+
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: timing-snyk-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
 
       - name: Upload JSON als Artifact
         uses: actions/upload-artifact@v4.6.2
@@ -480,6 +511,13 @@ jobs:
           echo "zap,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
 
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: timing-zap-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
+
       - name: Upload ZAP-Reports als Artifact
         uses: actions/upload-artifact@v4.6.2
         if: always()
@@ -528,8 +566,16 @@ jobs:
         run: |
           end=$(date +%s)
           duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
           echo "nuclei,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
+
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: timing-nuclei-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
 
       - name: Upload als Artifact
         uses: actions/upload-artifact@v4.6.2
@@ -573,8 +619,16 @@ jobs:
         run: |
           end=$(date +%s)
           duration=$((end - ${{ steps.t_start.outputs.start }}))
+          mkdir -p benchmark/results
           echo "dastardly,vulnerable-shop,${{ env.RUN_NUMBER }},${duration},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
+
+      - name: Upload Timing als Artifact
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: timing-dastardly-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/timing_ci.csv
 
       - name: Upload XML-Report als Artifact
         uses: actions/upload-artifact@v4.6.2
@@ -608,58 +662,76 @@ jobs:
           mkdir -p benchmark/results
           echo "tool,target,run,duration_seconds,timestamp" \
             > benchmark/results/timing_ci.csv
-
-          # Alle timing_ci.csv aus Sub-Artifacts zusammenführen
           find timing-artifacts/ -name "timing_ci.csv" -exec tail -n +2 {} \; \
             >> benchmark/results/timing_ci.csv
 
-          echo "=== Timing-Übersicht ==="
-          column -t -s',' benchmark/results/timing_ci.csv || cat benchmark/results/timing_ci.csv
-
-      # Build-Time-Δ berechnen:
-      # Δ = (Build-Dauer MIT Security-Steps) − (Build-Dauer OHNE Security-Steps)
-      # "ohne" = job.build.outputs.build_duration
       - name: Build-Time-Δ berechnen
         run: |
           baseline=${{ needs.build.outputs.build_duration || 0 }}
-          echo "Baseline (npm ci ohne Security-Tools): ${baseline}s"
-
-          # Summe aller SAST/SCA-Scan-Dauern aus CSV
           sast_sca_total=$(awk -F',' '
-            /^(semgrep|codeql|sonarqube|npm-audit|snyk|dependency-check),/ {sum += $4}
-            END {print sum}
+            /^(semgrep|codeql|sonarqube|npm-audit|snyk),/ {sum += $4}
+            END {print sum+0}
           ' benchmark/results/timing_ci.csv)
-
-          echo "SAST+SCA-Tool-Zeit gesamt: ${sast_sca_total}s"
-          echo "Build-Time-Delta: $((sast_sca_total))s über Baseline"
-
-          # In CSV anhängen
           echo "build_baseline,all,${{ env.RUN_NUMBER }},${baseline},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
-          echo "sast_sca_overhead,all,${{ env.RUN_NUMBER }},${sast_sca_total},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          echo "build_time_delta,all,${{ env.RUN_NUMBER }},${sast_sca_total},$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             >> benchmark/results/timing_ci.csv
 
-      - name: Upload konsolidiertes Timing
+      - name: Times_All erzeugen
+        run: |
+          OUT="benchmark/results/Times_All_Run_${{ env.RUN_NUMBER }}.txt"
+          {
+            echo "════════════════════════════════════════════════════"
+            echo "  BA Security Benchmark — Zeitmessung (FF2)"
+            echo "  Run: ${{ env.RUN_NUMBER }}   Datum: $(date -u +%Y-%m-%d)"
+            echo "════════════════════════════════════════════════════"
+            echo ""
+            echo "  Tool              | Dauer (s) | Dauer (min)"
+            echo "  ─────────────────────────────────────────────"
+            awk -F',' '
+              NR==1 { next }
+              $1 ~ /^(semgrep|codeql|sonarqube|npm-audit|snyk|zap|nuclei|dastardly)$/ {
+                printf "  %-17s | %9s | %10.1f\n", $1, $4, $4/60
+              }
+            ' benchmark/results/timing_ci.csv
+            echo "  ─────────────────────────────────────────────"
+            baseline=$(awk -F',' '$1=="build_baseline" {print $4}' benchmark/results/timing_ci.csv)
+            delta=$(awk -F',' '$1=="build_time_delta" {print $4}' benchmark/results/timing_ci.csv)
+            echo ""
+            echo "  Build-Baseline (npm ci ohne Tools): ${baseline}s"
+            echo "  Build-Time-Δ (SAST+SCA Overhead):  ${delta}s  ($(echo "scale=1; ${delta}/60" | bc) min)"
+            echo ""
+            echo "════════════════════════════════════════════════════"
+          } | tee "$OUT"
+
+      - name: Upload Times_All
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Times_All-run-${{ env.RUN_NUMBER }}
+          path: benchmark/results/Times_All_Run_${{ env.RUN_NUMBER }}.txt
+          retention-days: 90
+
+      - name: Upload konsolidiertes Timing-CSV
         uses: actions/upload-artifact@v4.6.2
         with:
           name: timing-consolidated-run-${{ env.RUN_NUMBER }}
           path: benchmark/results/timing_ci.csv
-          retention-days: 30
+          retention-days: 90
 
       - name: Pipeline-Summary (GitHub Actions Summary)
         run: |
           {
             echo "## BA Security Benchmark — Run ${{ env.RUN_NUMBER }}"
             echo ""
-            echo "### Timing-Übersicht"
+            echo "### Zeitmessung pro Tool"
             echo "\`\`\`"
-            column -t -s',' benchmark/results/timing_ci.csv 2>/dev/null || \
-              cat benchmark/results/timing_ci.csv
+            cat "benchmark/results/Times_All_Run_${{ env.RUN_NUMBER }}.txt"
             echo "\`\`\`"
             echo ""
             echo "### Artifacts"
-            echo "- SARIF-Outputs: sarif-semgrep-run-*, sarif-codeql-run-*"
-            echo "- SCA-JSONs:     result-npm-audit-run-*, result-snyk-run-*, result-dependency-check-run-*"
-            echo "- DAST-Reports:  result-zap-run-*, result-nuclei-run-*, result-dastardly-run-*"
-            echo "- Timing:        timing-consolidated-run-*"
+            echo "- **Times_All**: Times_All-run-${{ env.RUN_NUMBER }}"
+            echo "- **Timing-CSV**: timing-consolidated-run-${{ env.RUN_NUMBER }}"
+            echo "- SARIF: sarif-semgrep-run-*, sarif-codeql-run-*"
+            echo "- SCA: result-npm-audit-run-*, result-snyk-run-*"
+            echo "- DAST: result-zap-run-*, result-nuclei-run-*, result-dastardly-run-*"
           } >> "$GITHUB_STEP_SUMMARY"
