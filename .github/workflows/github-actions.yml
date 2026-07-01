@@ -453,12 +453,13 @@ jobs:
         id: t_start
         run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
 
-      # ZAP Automation Framework (nutzt .zap/automation.yml des Targets)
+      - name: Port 8080 für ZAP freigeben
+        run: sudo fuser -k 8080/tcp || true
+
       - name: ZAP Full Scan — vulnerable-shop
         uses: zaproxy/action-full-scan@v0.12.0
         with:
           target: "http://localhost:3001"
-          cmd_options: "-port 8090"
           allow_issue_writing: false
 
       - name: ZAP Output sichern
